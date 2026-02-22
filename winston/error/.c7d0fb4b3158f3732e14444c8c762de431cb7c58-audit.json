@@ -1,0 +1,60 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "C:\\ISMAIL\\Salem\\winston\\error\\.c7d0fb4b3158f3732e14444c8c762de431cb7c58-audit.json",
+    "files": [
+        {
+            "date": 1771646077762,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-09-error.log",
+            "hash": "86d4a682a5d3220d1db8966e38e0f4bc4d3781b81734c4637f34a993c21322f4"
+        },
+        {
+            "date": 1771646914417,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-10-error.log",
+            "hash": "3a0d55f77ab4836447b06b7e55c6e8b2a0ff27767e13ccf5a662f132d3580b1d"
+        },
+        {
+            "date": 1771650069663,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-11-error.log",
+            "hash": "59259f350245fd2b498cb78574af6c1aa27a4221a0e01529e18ed00b74fd7ab5"
+        },
+        {
+            "date": 1771653927938,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-12-error.log",
+            "hash": "1f545a835a1ded7e5280b040ded23dea6225c784830ced1ad94a152025f10788"
+        },
+        {
+            "date": 1771657268418,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-13-error.log",
+            "hash": "3ca2c37a7e7c9ab5a6a77909057991c04fa96305dfb72de66ced7c78cc4243d0"
+        },
+        {
+            "date": 1771660885260,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-14-error.log",
+            "hash": "ca5a71dddd3e250827b1a675947f08dc87955be1e88ef226173070faf776cdde"
+        },
+        {
+            "date": 1771664415428,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-15-error.log",
+            "hash": "d2ed9c9b2ccf8f290d60f3cd0346caa2bde4e58bf65f4918a0a6ef5cc15a1ad0"
+        },
+        {
+            "date": 1771727620961,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\22-02-2026-08-error.log",
+            "hash": "24e2de6bf9add7594b2f0c200928156417e88fbefb331c921d4ec68f3794b7fd"
+        },
+        {
+            "date": 1771729348640,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\22-02-2026-09-error.log",
+            "hash": "82125b1282f989c57ea4152a3cd315bd1f96d245f96f0cb914b850e7dde5e6ee"
+        },
+        {
+            "date": 1771736745222,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\22-02-2026-11-error.log",
+            "hash": "b84180b58e2fbc6b944a6f90bfe603f84c0a99e10d8867ed3fd16aecffcac848"
+        }
+    ],
+    "hashType": "sha256"
+}
