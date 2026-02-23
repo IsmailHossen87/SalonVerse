@@ -5,7 +5,10 @@ import { ReferralService } from "./referral.service";
 const getMyReferralLink = async (req: Request, res: Response) => {
     try {
 
-        const userId = req.user.id;
+        const userId = req.user.userId;
+
+        console.log("userId", userId)
+
         const result = await ReferralService.getMyReferralLink(userId);
 
         res.status(200).json({

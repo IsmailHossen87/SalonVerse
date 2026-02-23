@@ -6,7 +6,7 @@ import { checkAuth } from "../../middleware/checkAuth";
 
 const router = Router();
 
-router.get(
+router.post(
     "/my-referral-link",
     checkAuth(USER_ROLE.USER),
     ReferralController.getMyReferralLink

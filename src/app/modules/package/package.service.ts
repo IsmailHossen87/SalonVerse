@@ -1,4 +1,4 @@
-import AppError from '../../../errors/AppError';
+import AppError from '../../errorHalper.ts/AppError';
 import { IPackage } from './package.interface';
 import { Package } from './package.model';
 import { StatusCodes } from 'http-status-codes';

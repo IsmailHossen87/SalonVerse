@@ -12,7 +12,7 @@ router.post("/", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.cr
 router.get("/", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER), catchAsync(salonController.getAllSalon));
 router.get("/:id", salonController.getSingleSalon);
 
-router.patch("/:id", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.updateSalon));
+router.patch("/:id", checkAuth(USER_ROLE.OWNER), catchAsync(salonController.updateSalon));
 router.delete("/:id", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.deleteSalon));
 
 export const SalonRoutes = router;

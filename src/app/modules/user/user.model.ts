@@ -20,6 +20,7 @@ export const UserSchema = new Schema<IUser>({
         country: { type: String, },
         zipCode: { type: String, },
     },
+
     dateOfBirth: { type: Date, },
     secretRefreshToken: { type: [String], default: [] },
     auths: [authProviderSchema],

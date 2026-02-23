@@ -53,6 +53,7 @@ app.use(async (req, res, next) => {
 });
 
 
+app.set("trust proxy", 1);
 
 app.get("/", (req, res) => {
     const date = new Date(Date.now());

@@ -109,12 +109,12 @@ const getSingleSalon = async (id: string) => {
 
 
 const updateSalon = async (id: string, payload: any, user: string) => {
-    const superAdmin = await UserModel.findById(user);
-    if (!superAdmin) {
-        throw new AppError(httpStatus.NOT_FOUND, "Super Admin not found");
+    const owner = await UserModel.findById(user);
+    if (!owner) {
+        throw new AppError(httpStatus.NOT_FOUND, "Owner not found");
     }
 
-    if (superAdmin.role !== USER_ROLE.SUPER_ADMIN) {
+    if (owner.role !== USER_ROLE.OWNER) {
         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
     const salon = await SalonModel.findByIdAndUpdate(id, payload, {

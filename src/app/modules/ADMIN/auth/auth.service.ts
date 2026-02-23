@@ -14,7 +14,6 @@ import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
 import httpStatus from "http-status-codes";
 import bcrypt from "bcrypt";
 import { createNewAccessTokenWinthRefreshToken } from "../../../utils/userToken";
-import { verifyOTPCode } from "../../user/otp.service";
 
 // 🔥 NEW: Google Login Service
 const googleLogin = async (idToken: string) => {
@@ -116,6 +115,38 @@ const loginCredential = async (data: { phoneNumber: string; otp: string }) => {
     };
 };
 
+const loginSuperAdmin = async (data: IUser) => {
+    const result = await UserModel.findOne({ email: data.email })
+    if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found")
+    }
+    if (!result.verified) throw new AppError(httpStatus.UNAUTHORIZED, "User not verified")
+
+    const isPasswordMatched = await bcrypt.compare(data.password, result.password)
+    if (!isPasswordMatched) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Password not matched")
+    }
+    const token = await CreateUserToken(result)
+    // 🔔🔔🪧🔔🔔
+    if (result?.fcmToken) {
+        await firebaseNotificationBuilder({
+            user: result,
+            title: "Welcome Backe",
+            body: "You've successfully logged in",
+            notificationEvent: INOTIFICATION_EVENT.LOGIN,
+            notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+            referenceId: result._id,
+            referenceType: "User"
+        })
+    }
+
+
+    return {
+        accessToken: token.accessToken,
+        refreshToken: token.refreshToken
+    }
+}
+
 
 // RefreshToken
 const refreshToken = async (data: { refreshToken: string }) => {
@@ -159,8 +190,6 @@ const sendOtp = async (email: string) => {
     const hashCode = generateHashCode(user)
 
     const redisKey = `email:${email}:${hashCode}`
-
-    console.log("---RedisKey----1-", redisKey)
 
     await redisClient.set(redisKey, otp.toString(), {
         EX: 60 * 2
@@ -292,6 +321,7 @@ const changePassword = async (data: { oldPassword: string, newPassword: string, 
 
 export const authService = {
     loginCredential,
+    loginSuperAdmin,
     refreshToken,
     logout,
     sendOtp,

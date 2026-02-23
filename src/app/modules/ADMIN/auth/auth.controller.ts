@@ -19,6 +19,16 @@ const loginCredential = catchAsync(async (req: Request, res: Response, next: Nex
         data: result
     })
 })
+const loginSuperAdmin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const result = await authService.loginSuperAdmin(req.body)
+
+    setAuthCookie(res, { refreshToken: result.refreshToken })    //IF USE set cookie
+    res.status(200).json({
+        success: true,
+        message: "User Login successfully",
+        data: result
+    })
+})
 // 🔥🔥🔥🔥 Google Login
 const googleLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { idToken } = req.body;
@@ -107,6 +117,7 @@ const changePassword = catchAsync(async (req: Request, res: Response, next: Next
 
 export const authController = {
     loginCredential,
+    loginSuperAdmin,
     refreshToken,
     logout,
     sendOtp,

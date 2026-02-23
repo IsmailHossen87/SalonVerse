@@ -17,6 +17,10 @@ export interface ISalon {
     subscriptionType: SUBSCRIPTION_TYPE;
     startDate: Date;
     expiryDate: Date;
+    // OWNER SET data
+    image: string;
+    location: string;
+    service: string;
 
     phone: string;
     email: string;

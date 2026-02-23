@@ -8,6 +8,7 @@ const router = Router()
 
 
 router.post("/login", authController.loginCredential)
+router.post("/login-superAdmin", authController.loginSuperAdmin)
 // 🔥 NEW: Google Authentication Route
 router.post("/google-login", authController.googleLogin);
 router.post("/refresh-token", authController.refreshToken)

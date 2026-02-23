@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import catchAsync from '../../../shared/catchAsync';
 import { PackageService } from './package.service';
-import sendResponse from '../../../shared/sendResponse';
 import { StatusCodes } from 'http-status-codes';
+import { sendResponse } from '../../utils/sendResponse';
+import catchAsync from '../../utils/catchAsync';
 
 const createPackage = catchAsync(async (req: Request, res: Response) => {
   const result = await PackageService.createPackageIntoDB(req.body);
@@ -18,7 +18,7 @@ const createPackage = catchAsync(async (req: Request, res: Response) => {
 // update package
 const updatePackage = catchAsync(async (req: Request, res: Response) => {
   const result = await PackageService.updatePackageIntoDB(
-    req.params.id,
+    req.params.id as string,
     req.body
   );
 
@@ -32,7 +32,7 @@ const updatePackage = catchAsync(async (req: Request, res: Response) => {
 
 // delete package
 const deletePackage = catchAsync(async (req: Request, res: Response) => {
-  const result = await PackageService.deletePackageFromDB(req.params.id);
+  const result = await PackageService.deletePackageFromDB(req.params.id as string);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,

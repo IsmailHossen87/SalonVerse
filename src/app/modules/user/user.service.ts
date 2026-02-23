@@ -8,7 +8,10 @@ import unlinkFile from "../../shared/unLinkFile";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import generateNumber from "../../utils/generate";
 import { Reward } from "../reward/reward.model";
-import { sendOTP, verifyOTPCode } from "./otp.service"; // নতুন import
+import mongoose from "mongoose";
+import { verifyOTPService } from "../OTP/OTP.service";
+import { sendOTP } from "../../middleware/twilio";
+
 
 // ✅ Step 1: OTP পাঠাও
 const sendRegistrationOTP = async (phoneNumber: string) => {
@@ -22,69 +25,160 @@ const sendRegistrationOTP = async (phoneNumber: string) => {
 };
 
 // ✅ Step 2: OTP verify + User create
-const createUser = async (payload: any) => {
-    const { referralCode, phoneNumber, otp } = payload;
+// const createUser = async (payload: any) => {
+//     const { referralCode, phoneNumber, otp } = payload;
 
-    // OTP verify করো
-    // try {
-    //     await verifyOTPCode(phoneNumber, otp);
-    // } catch (err) {
-    //     throw new AppError(httpStatus.BAD_REQUEST, "Invalid or expired OTP");
-    // }
+//     // OTP verify করো
+//     try {
+//         await verifyOTPCode(phoneNumber, otp);
+//     } catch (err) {
+//         throw new AppError(httpStatus.BAD_REQUEST, "Invalid or expired OTP");
+//     }
 
-    const existingUser = await UserModel.findOne({ phoneNumber });
-    if (existingUser) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
-    }
+//     const existingUser = await UserModel.findOne({ phoneNumber });
+//     if (existingUser) {
+//         throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
+//     }
 
-    // Check inviter
-    let inviterUser = null;
-    if (referralCode) {
-        inviterUser = await UserModel.findOne({ referralCode });
-        if (!inviterUser) {
-            throw new AppError(httpStatus.BAD_REQUEST, "Invalid referral code");
-        }
-    }
+//     // Check inviter
+//     let inviterUser = null;
+//     if (referralCode) {
+//         inviterUser = await UserModel.findOne({ referralCode });
+//         if (!inviterUser) {
+//             throw new AppError(httpStatus.BAD_REQUEST, "Invalid referral code");
+//         }
+//     }
 
-    // Create user
-    const user = await UserModel.create({
-        ...payload,
-        referralCode: generateNumber(8),
-        invitedBy: inviterUser ? inviterUser._id : null,
-        isPhoneVerified: true,
-        status: IStatus.ACTIVE,
-    });
+//     // Create user
+//     const user = await UserModel.create({
+//         ...payload,
+//         referralCode: generateNumber(8),
+//         invitedBy: inviterUser ? inviterUser._id : null,
+//         isPhoneVerified: true,
+//         status: IStatus.ACTIVE,
+//     });
 
-    // Invite reward logic
-    if (inviterUser) {
-        const updatedInviter = await UserModel.findByIdAndUpdate(
-            inviterUser._id,
-            { $inc: { successfulInvites: 1 } },
-            { new: true }
+//     // Invite reward logic
+//     if (inviterUser) {
+//         const updatedInviter = await UserModel.findByIdAndUpdate(
+//             inviterUser._id,
+//             { $inc: { successfulInvites: 1 } },
+//             { new: true }
+//         );
+
+//         if (
+//             updatedInviter &&
+//             typeof updatedInviter.successfulInvites === "number" &&
+//             updatedInviter.successfulInvites % 3 === 0
+//         ) {
+//             await Reward.create({
+//                 userId: updatedInviter._id,
+//                 type: "INVITE",
+//                 title: "Invite Reward - 20 AED",
+//                 discountAmount: 20,
+//                 expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+//                 isUsed: false,
+//                 source: "SYSTEM",
+//                 createdAt: new Date(),
+//             });
+//         }
+//     }
+
+//     return user;
+// };
+
+export const createUser = async (payload: any) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const { referralCode, phoneNumber, otp, ...rest } = payload;
+
+        /* ================= OTP VERIFY ================= */
+
+        await verifyOTPService(
+            phoneNumber,
+            otp,
         );
 
-        if (
-            updatedInviter &&
-            typeof updatedInviter.successfulInvites === "number" &&
-            updatedInviter.successfulInvites % 3 === 0
-        ) {
-            await Reward.create({
-                userId: updatedInviter._id,
-                type: "INVITE",
-                title: "Invite Reward - 20 AED",
-                discountAmount: 20,
-                expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-                isUsed: false,
-                source: "SYSTEM",
-                createdAt: new Date(),
-            });
-        }
-    }
+        /* ================= ONE ACCOUNT PER PHONE ================= */
 
-    return user;
+        const existingUser = await UserModel.findOne({ phoneNumber });
+        if (existingUser) {
+            throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
+        }
+
+        /* ================= CHECK INVITER ================= */
+
+        let inviterUser = null;
+
+        if (referralCode) {
+            inviterUser = await UserModel.findOne({ referralCode });
+            if (!inviterUser) {
+                throw new AppError(httpStatus.BAD_REQUEST, "Invalid referral code");
+            }
+        }
+
+        /* ================= CREATE USER ================= */
+
+        const user = await UserModel.create(
+            [
+                {
+                    ...rest,
+                    phoneNumber,
+                    referralCode: generateNumber(8),
+                    invitedBy: inviterUser ? inviterUser._id : null,
+                    isPhoneVerified: true,
+                    status: IStatus.ACTIVE,
+                },
+            ],
+            { session }
+        );
+
+        /* ================= INVITE REWARD ================= */
+
+        if (inviterUser) {
+            const updatedInviter = await UserModel.findByIdAndUpdate(
+                inviterUser._id,
+                { $inc: { successfulInvites: 1 } },
+                { new: true, session }
+            );
+
+            if (
+                updatedInviter &&
+                typeof updatedInviter.successfulInvites === "number" &&
+                updatedInviter.successfulInvites % 3 === 0
+            ) {
+                await Reward.create(
+                    [
+                        {
+                            userId: updatedInviter._id,
+                            type: "INVITE",
+                            title: "Invite Reward - 20 AED",
+                            discountAmount: 20,
+                            expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                            isUsed: false,
+                            source: "SYSTEM",
+                            createdAt: new Date(),
+                        },
+                    ],
+                    { session }
+                );
+            }
+        }
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return user[0];
+    } catch (error) {
+        await session.abortTransaction();
+        session.endSession();
+        throw error;
+    }
 };
 
-// বাকি সব same...
+
 const getAllUser = async (user: JwtPayload, query: any) => {
     if (user.role !== USER_ROLE.SUPER_ADMIN) {
         throw new AppError(httpStatus.BAD_REQUEST, "You are not authorized");
