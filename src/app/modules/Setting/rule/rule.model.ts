@@ -11,8 +11,8 @@ const ruleSchema = new Schema<IRule>(
           ruleType: { type: String, enum: Object.values(RuleType), required: true },
 
           everyVisitCoins: { type: Number, },
-          timeZoneStart: { type: Date },
-          timeZoneEnd: { type: Date },
+          timeZoneStart: { type: Number },
+          timeZoneEnd: { type: Number },
           timeZoneGetCoin: { type: Number, },
           totalVist: { type: Number, },
           totalVisitGetCoin: { type: Number, },

@@ -29,8 +29,8 @@ export type IRule = {
      passwordLength: number;
      ruleType: RuleType;
      everyVisitCoins: number;
-     timeZoneStart: TimeRanges;
-     timeZoneEnd: TimeRanges;
+     timeZoneStart: number;
+     timeZoneEnd: number;
      timeZoneGetCoin: number;
      totalVist: number;
      totalVisitGetCoin: number;

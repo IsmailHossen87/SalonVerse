@@ -31,6 +31,8 @@ export const UserSchema = new Schema<IUser>({
     fcmToken: { type: String, select: false },
 
     coins: { type: Number, default: 0 },
+    spentCoins: { type: Number, default: 0 },
+
     referralCode: { type: String, unique: true },
     invitedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     successfulInvites: { type: Number, default: 0 },
@@ -50,3 +52,5 @@ export const UserSchema = new Schema<IUser>({
 
 
 export const UserModel = model<IUser>('User', UserSchema);
+
+

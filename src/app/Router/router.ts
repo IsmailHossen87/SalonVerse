@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { userRouter } from "../modules/user/user.router";
 import { SalonRoutes } from "../modules/SUPER_ADMIN/salon/salon.router";
-import { authRouter } from "../modules/ADMIN/auth/auth.router";
+import { authRouter } from "../modules/auth/auth.router";
 import { RuleRoute } from "../modules/Setting/rule/rule.route";
 import { InviteRoutes } from "../modules/invite/invite.router";
 import { ReferralRouter } from "../modules/referral/referral.router";
+import { salonRewardRouter } from "../modules/ADMIN/salonReward/salonReward.router";
 
 const router = Router();
 
@@ -32,6 +33,10 @@ const apiRoutes = [
     {
         path: "/referral",
         router: ReferralRouter
+    },
+    {
+        path: "/salon-reward",
+        router: salonRewardRouter
     }
 ]
 

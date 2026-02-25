@@ -1,14 +1,14 @@
 import { Router } from "express";
 import { authController } from "./auth.controller";
-import { checkAuth } from "../../../middleware/checkAuth";
-import { USER_ROLE } from "../../user/user.interface";
+import { checkAuth } from "../../middleware/checkAuth";
+import { USER_ROLE } from "../user/user.interface";
 
 // auth.router.ts
 const router = Router()
 
 
 router.post("/login", authController.loginCredential)
-router.post("/login-superAdmin", authController.loginSuperAdmin)
+router.post("/login-admin", authController.loginSuperAdmin)
 // 🔥 NEW: Google Authentication Route
 router.post("/google-login", authController.googleLogin);
 router.post("/refresh-token", authController.refreshToken)

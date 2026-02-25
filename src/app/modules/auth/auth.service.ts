@@ -1,19 +1,19 @@
-import AppError from "../../../errorHalper.ts/AppError";
-import { firebaseAdmin } from "../../../middleware/firebaseAdmin";
-import { UserModel } from "../../user/user.model";
-import { IAuthProvider, IStatus, IUser, USER_ROLE } from "../../user/user.interface";
-import { CreateUserToken } from "../../../utils/userToken";
+import AppError from "../../errorHalper.ts/AppError";
+import { firebaseAdmin } from "../../middleware/firebaseAdmin";
+import { UserModel } from "../user/user.model";
+import { IAuthProvider, IStatus, IUser, USER_ROLE } from "../user/user.interface";
+import { CreateUserToken } from "../../utils/userToken";
 import { JwtPayload } from "jsonwebtoken";
-import { verifyToken } from "../../../utils/jwt";
-import { envVar } from "../../../config/env";
-import { redisClient } from "../../../config/redis.config";
-import generateNumber, { generateHashCode } from "../../../utils/generate";
-import { sendEmail } from "../../../utils/sendEmail";
-import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
-import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
+import { verifyToken } from "../../utils/jwt";
+import { envVar } from "../../config/env";
+import { redisClient } from "../../config/redis.config";
+import generateNumber, { generateHashCode } from "../../utils/generate";
+import { sendEmail } from "../../utils/sendEmail";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../notification/notification.interface";
+import { firebaseNotificationBuilder } from "../../shared/sendNotification";
 import httpStatus from "http-status-codes";
 import bcrypt from "bcrypt";
-import { createNewAccessTokenWinthRefreshToken } from "../../../utils/userToken";
+import { createNewAccessTokenWinthRefreshToken } from "../../utils/userToken";
 
 // 🔥 NEW: Google Login Service
 const googleLogin = async (idToken: string) => {

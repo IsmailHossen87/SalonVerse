@@ -36,9 +36,9 @@ export const createNewAccessTokenWinthRefreshToken = async (refreshToken: string
     if (isUserExites.status === IStatus.BLOCKED) {
         throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExites.status}`)
     }
-    if (isUserExites.isDeleted) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
-    }
+    // if (isUserExites.) {
+    //     throw new AppError(httpStatus.BAD_REQUEST, "User is deleted")
+    // }
 
     const jwtPayload = {
         userId: isUserExites._id,

@@ -6,6 +6,7 @@ import { UserModel } from "../../user/user.model";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { generateHashCode } from "../../../utils/generate";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
+import { visitSalon } from "./visitRecord";
 
 const createSalon = async (payload: any, user: string) => {
     const superAdmin = await UserModel.findById(user);
@@ -55,7 +56,7 @@ const getAllSalon = async (query: any) => {
 
     const queryBuilder = new QueryBuilder(SalonModel.find().populate("admin", "name email phoneNumber"), query);
     const result = await queryBuilder
-        .search(['businessName', 'businessType', 'city', 'activeStatus'])
+        .search(['businessName', 'service', 'city', 'activeStatus'])
         .filter()
         .sort()
         .paginate()
@@ -78,7 +79,10 @@ const getAllSalon = async (query: any) => {
 
 };
 
-const getSingleSalon = async (id: string) => {
+const getSingleSalon = async (id: string, userId: string) => {
+    const viwerInfo = await UserModel.findById(userId);
+    if (!viwerInfo) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+
     // 1️⃣ Find the salon and populate admin info
     const salon = await SalonModel.findById(id).populate("admin", "name email phoneNumber");
     if (!salon) {
@@ -93,7 +97,7 @@ const getSingleSalon = async (id: string) => {
         .lean();
 
     // 3️⃣ Calculate total points issued
-    const totalPointIssued = visitors.reduce((sum, visitor) => sum + (visitor.pointIssued || 0), 0);
+    await visitSalon(salon._id.toString(), viwerInfo._id.toString());          //calculate reward
 
     // 4️⃣ Calculate total online customers
     const totalOnline = visitors.filter(visitor => visitor.customer?.isOnline).length;
@@ -101,7 +105,7 @@ const getSingleSalon = async (id: string) => {
     // 5️⃣ Return summary only
     return {
         ...salon.toObject(),
-        totalPointIssued,
+        // totalPointIssued,
         totalOnline,
     };
 };
@@ -117,7 +121,12 @@ const updateSalon = async (id: string, payload: any, user: string) => {
     if (owner.role !== USER_ROLE.OWNER) {
         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
-    const salon = await SalonModel.findByIdAndUpdate(id, payload, {
+    const salonOwner = await SalonModel.findOne({ admin: owner._id, _id: id });
+    if (!salonOwner) {
+        throw new AppError(httpStatus.NOT_FOUND, `Salon not found for this ${owner.name}`);
+    }
+
+    const salon = await SalonModel.findByIdAndUpdate(salonOwner._id, payload, {
         new: true,
     });
 

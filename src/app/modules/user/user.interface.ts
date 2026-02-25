@@ -7,6 +7,8 @@ export enum USER_ROLE {
 
 export enum IStatus {
     PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
     COMPLETED = 'COMPLETED',
     ACTIVE = 'ACTIVE',
     INACTIVE = 'INACTIVE',
@@ -41,6 +43,8 @@ export interface IUser {
     };
 
     coins?: number;
+    pendingCoins?: number;
+    spentCoins?: number;
     referralCode?: string;
     invitedBy?: string;
     successfulInvites?: number;

@@ -1,11 +1,11 @@
 // auth.controller.ts
 import { NextFunction, Request, Response } from "express"
-import catchAsync from "../../../utils/catchAsync"
+import catchAsync from "../../utils/catchAsync"
 import { authService } from "./auth.service"
-import { setAuthCookie } from "../../../utils/setCookie"
+import { setAuthCookie } from "../../utils/setCookie"
 import { JwtPayload } from "jsonwebtoken"
 import httpStatus from "http-status-codes"
-import AppError from "../../../errorHalper.ts/AppError"
+import AppError from "../../errorHalper.ts/AppError"
 
 
 // user.controller.ts

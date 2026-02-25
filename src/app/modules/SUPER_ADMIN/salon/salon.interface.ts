@@ -6,11 +6,25 @@ export enum SUBSCRIPTION_TYPE {
     BASIC = "basic",
     PREMIUM = "premium"
 }
+export enum IDay {
+    SUNDAY = "sunday",
+    MONDAY = "monday",
+    TUESDAY = "tuesday",
+    WEDNESDAY = "wednesday",
+    THURSDAY = "thursday",
+    FRIDAY = "friday",
+    SATURDAY = "saturday"
+}
+export interface IOpeningTime {
+    day: IDay;
+    openingTime: string;
+    closingTime: string;
+    isClosed: boolean;
+}
 
 export interface ISalon {
     createdBy: Types.ObjectId;
     businessName: string;
-    businessType: string; // salon, clinic etc
     city: string;
     salonId: string;
 
@@ -21,6 +35,9 @@ export interface ISalon {
     image: string;
     location: string;
     service: string;
+    description: string;
+    openingTime: IOpeningTime[];
+
 
     phone: string;
     email: string;

@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { RuleService } from './rule.service';
 import catchAsync from '../../../utils/catchAsync';
 import { sendResponse } from '../../../utils/sendResponse';
 import AppError from '../../../errorHalper.ts/AppError';
 import { RuleType } from './rule.interface';
+import { RuleService } from './rule.service';
 
 
 const globalRule = catchAsync(async (req: Request, res: Response) => {

@@ -1,1 +1,0 @@
-// reward.interface.ts
