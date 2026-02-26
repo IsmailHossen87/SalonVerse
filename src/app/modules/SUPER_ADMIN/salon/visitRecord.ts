@@ -1,5 +1,5 @@
 import AppError from "../../../errorHalper.ts/AppError";
-import { ViewReward } from "../../reward/reward.model";
+import { PointIssuedHistory, ViewReward } from "../../reward/reward.model";
 import { Rule } from "../../Setting/rule/rule.model";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { UserModel } from "../../user/user.model";
@@ -103,7 +103,6 @@ export const visitSalon = async (salonId: string, userId: string) => {
         },
         { upsert: true, new: true }
     );
-
 
     return {
         message: `Visit recorded! ${coinsToAdd} coins added`,

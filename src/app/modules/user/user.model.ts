@@ -4,13 +4,13 @@ import { USER_ROLE, IStatus, IUser, IAuthProvider } from "./user.interface";
 const authProviderSchema = new Schema<IAuthProvider>({
     provider: { type: String, required: true },
     providerId: { type: String, required: true },
-})
+},)
 
 // user.model.ts
 export const UserSchema = new Schema<IUser>({
     name: { type: String },
     email: { type: String },
-    password: { type: String },
+    password: { type: String, select: false },
     role: { type: String, enum: Object.values(USER_ROLE), default: USER_ROLE.USER, },
     image: { type: String, },
     phoneNumber: { type: String, unique: true, required: true },
@@ -22,7 +22,7 @@ export const UserSchema = new Schema<IUser>({
     },
 
     dateOfBirth: { type: Date, },
-    secretRefreshToken: { type: [String], default: [] },
+    secretRefreshToken: { type: [String], default: [], select: false },
     auths: [authProviderSchema],
     verified: { type: Boolean, default: false, },
     status: { type: String, enum: Object.values(IStatus), default: IStatus.PENDING, },

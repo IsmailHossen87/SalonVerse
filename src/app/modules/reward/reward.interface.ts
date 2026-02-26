@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { IStatus } from "../user/user.interface";
 
 // reward.interface.ts
 export interface IReward {
@@ -12,3 +13,12 @@ export interface IReward {
     createdAt: Date
 }
 
+export interface ISalonVisit {
+    userId: Types.ObjectId;
+    salonId: Types.ObjectId;
+    pendingCoins: number;
+    status: IStatus;
+    viewCount: number;
+    lastVisitAt?: Date;
+    visitor: number;
+}

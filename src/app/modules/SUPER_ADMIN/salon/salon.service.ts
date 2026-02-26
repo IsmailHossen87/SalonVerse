@@ -1,12 +1,13 @@
 // salon.service.ts
 import httpStatus from "http-status-codes";
-import { CustomerVisitorModel, SalonModel } from "./salon.model";
+import { SalonModel } from "./salon.model";
 import AppError from "../../../errorHalper.ts/AppError";
 import { UserModel } from "../../user/user.model";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { generateHashCode } from "../../../utils/generate";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
 import { visitSalon } from "./visitRecord";
+import { ViewReward } from "../../reward/reward.model";
 
 const createSalon = async (payload: any, user: string) => {
     const superAdmin = await UserModel.findById(user);
@@ -70,7 +71,7 @@ const getAllSalon = async (query: any) => {
     }
     const allData = await Promise.all(
         data.map(async (salon) => {
-            const visitor = await CustomerVisitorModel.countDocuments({ salon: salon._id });
+            const visitor = await ViewReward.countDocuments({ salonId: salon._id });
             return { ...salon.toObject(), visitor }
         })
     )
@@ -90,22 +91,21 @@ const getSingleSalon = async (id: string, userId: string) => {
     }
 
     // 2️⃣ Find all visitors for this salon
-    const visitors = await CustomerVisitorModel.find({ salon: salon._id }).populate<{ customer: { isOnline: boolean; pointIssued?: number } }>(
-        "customer",
-        "isOnline pointIssued"
+    const visitors = await ViewReward.find({ salonId: salon._id }).populate<{ customer: { isOnline: boolean } }>(
+        "userId",
+        "isOnline "
     )
         .lean();
 
     // 3️⃣ Calculate total points issued
-    await visitSalon(salon._id.toString(), viwerInfo._id.toString());          //calculate reward
+    await visitSalon(salon._id.toString(), viwerInfo._id.toString());
 
     // 4️⃣ Calculate total online customers
-    const totalOnline = visitors.filter(visitor => visitor.customer?.isOnline).length;
+    const totalOnline = visitors.filter(visitor => visitor.userId?.isOnline).length;
 
     // 5️⃣ Return summary only
     return {
         ...salon.toObject(),
-        // totalPointIssued,
         totalOnline,
     };
 };

@@ -28,7 +28,7 @@ const googleLogin = async (idToken: string) => {
         }
 
         // Check if user already exists
-        let user = await UserModel.findOne({ email });
+        let user = await UserModel.findOne({ email }).select("auths");
         let isNewUser = false;
 
         if (!user) {
@@ -161,7 +161,7 @@ const logout = async (data: { refreshToken: string }) => {
     const decoded = verifyToken(refreshToken, envVar.JWT_REFRESH_SECRET) as JwtPayload;
 
 
-    const user = await UserModel.findOne({ email: decoded.email });
+    const user = await UserModel.findOne({ email: decoded.email }).select("secretRefreshToken");
 
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, "User not found");

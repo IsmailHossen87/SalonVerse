@@ -213,7 +213,7 @@ const updateUser = async (payload: any, owner: JwtPayload) => {
 };
 
 const userDetails = async (userId: string) => {
-    const result = await UserModel.findById({ _id: userId }).select("-password -secretRefreshToken");
+    const result = await UserModel.findById({ _id: userId }).select("-password ");
     if (!result) {
         throw new AppError(httpStatus.BAD_REQUEST, "User not found");
     }

@@ -6,6 +6,8 @@ import { RuleRoute } from "../modules/Setting/rule/rule.route";
 import { InviteRoutes } from "../modules/invite/invite.router";
 import { ReferralRouter } from "../modules/referral/referral.router";
 import { salonRewardRouter } from "../modules/ADMIN/salonReward/salonReward.router";
+import { VisitRoutes } from "../modules/ADMIN/visit/visit.router";
+import { CustomerRoutes } from "../modules/ADMIN/customer/customer.router";
 
 const router = Router();
 
@@ -37,6 +39,14 @@ const apiRoutes = [
     {
         path: "/salon-reward",
         router: salonRewardRouter
+    },
+    {
+        path: "/visit",
+        router: VisitRoutes
+    },
+    {
+        path: "/customer",
+        router: CustomerRoutes
     }
 ]
 

@@ -11,7 +11,7 @@ import { parseFormDataMiddleware } from "../../../middleware/parseFromData";
 const router = express.Router();
 
 router.post("/", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.createSalon));
-router.get("/", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER), catchAsync(salonController.getAllSalon));
+router.get("/", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER, USER_ROLE.USER), catchAsync(salonController.getAllSalon));
 router.get("/:id", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), catchAsync(salonController.getSingleSalon));
 
 router.patch("/:id", checkAuth(USER_ROLE.OWNER),

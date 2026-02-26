@@ -39,13 +39,15 @@ const salonSchema = new Schema<ISalon>(
     }
 );
 
-const customerVisitorSchema = new Schema({
-    salon: { type: Schema.Types.ObjectId, ref: "Salon", required: true, },
-    customer: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-    visitDate: { type: Date, required: true, },
-    visitTime: { type: String, required: true, },
-});
+// const customerVisitorSchema = new Schema({
+//     salon: { type: Schema.Types.ObjectId, ref: "Salon", required: true, },
+//     customer: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+//     visitDate: { type: Date, required: true, },
+//     visitTime: { type: String, required: true, },
+//     viewCount: { type: Number, default: 0 },
+//     lastVisitAt: { type: Date },
+// });
 
-export const CustomerVisitorModel = model("CustomerVisitor", customerVisitorSchema);
+// export const CustomerVisitorModel = model("CustomerVisitor", customerVisitorSchema);
 
 export const SalonModel = model<ISalon>("Salon", salonSchema);
