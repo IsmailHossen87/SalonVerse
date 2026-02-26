@@ -8,6 +8,7 @@ import { ReferralRouter } from "../modules/referral/referral.router";
 import { salonRewardRouter } from "../modules/ADMIN/salonReward/salonReward.router";
 import { VisitRoutes } from "../modules/ADMIN/visit/visit.router";
 import { CustomerRoutes } from "../modules/ADMIN/customer/customer.router";
+import { DashboardRouter } from "../modules/ADMIN/dashboard/dashboard.router";
 
 const router = Router();
 
@@ -47,6 +48,10 @@ const apiRoutes = [
     {
         path: "/customer",
         router: CustomerRoutes
+    },
+    {
+        path: "/dashboard",
+        router: DashboardRouter
     }
 ]
 

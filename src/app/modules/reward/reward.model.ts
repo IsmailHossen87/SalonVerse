@@ -19,10 +19,12 @@ const viewRewardSchema = new Schema({
     userId: { type: Types.ObjectId, ref: "User" },
     salonId: { type: Types.ObjectId, ref: "Salon" },
     pendingCoins: { type: Number },
+    totalCoins: { type: Number },
     status: { type: String, enum: Object.values(IStatus), default: IStatus.PENDING },
     viewCount: { type: Number, default: 0 },
     lastVisitAt: { type: Date }
 });
+
 viewRewardSchema.index({ userId: 1, salonId: 1, createdAt: 1 });
 export const ViewReward = model("ViewReward", viewRewardSchema);
 
@@ -31,6 +33,7 @@ const purchaseRewardSchema = new Schema({
     userId: { type: Types.ObjectId, ref: "User" },
     salonId: { type: Types.ObjectId, ref: "Salon" },
     rewardId: { type: Types.ObjectId, ref: "RewardSalon" },
+    pointCost: { type: Number },
     status: { type: String, enum: Object.values(IStatus), default: IStatus.PENDING },
 });
 

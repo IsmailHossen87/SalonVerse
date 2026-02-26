@@ -10,7 +10,7 @@ const authProviderSchema = new Schema<IAuthProvider>({
 export const UserSchema = new Schema<IUser>({
     name: { type: String },
     email: { type: String },
-    password: { type: String, select: false },
+    password: { type: String, },
     role: { type: String, enum: Object.values(USER_ROLE), default: USER_ROLE.USER, },
     image: { type: String, },
     phoneNumber: { type: String, unique: true, required: true },
@@ -48,7 +48,7 @@ export const UserSchema = new Schema<IUser>({
         default: Date.now,
     },
     isOnline: { type: Boolean, default: false, },
-})
+}, { timestamps: true })
 
 
 export const UserModel = model<IUser>('User', UserSchema);

@@ -20,7 +20,6 @@ const googleLogin = async (idToken: string) => {
     try {
         // Firebase দিয়ে ID Token verify করা
         const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
-
         const { uid, email, name, picture } = decodedToken;
 
         if (!email) {

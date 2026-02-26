@@ -94,6 +94,7 @@ const claimReward = async (id: string, userId: string) => {
         rewardId: reward._id,
         userId: visitorUser._id,
         salonId: reward.salonId,
+        pointCost: reward.rewardPoints
     });
 
     await UserModel.findByIdAndUpdate(visitorUser._id, {
