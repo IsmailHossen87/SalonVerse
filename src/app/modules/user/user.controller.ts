@@ -51,7 +51,7 @@ const updateUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const userDetails = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.params.id as string;
+    const userId = req.user.userId as string;
     const result = await userService.userDetails(userId);
     res.status(200).json({
         success: true,

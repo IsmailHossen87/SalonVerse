@@ -20,6 +20,7 @@ const getAllCustomer = catchAsync(async (req: Request, res: Response, next: Next
 
     })
 })
+
 const singleUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
     const result = await CustomerService.getSingleUser(req.params.id as string, req.user as JwtPayload);
@@ -31,9 +32,19 @@ const singleUser = catchAsync(async (req: Request, res: Response, next: NextFunc
     })
 })
 
+const approvedReward = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
+    const result = await CustomerService.approvedReward(req.params.id as string, req.user as JwtPayload);
+    res.status(200).json({
+        success: true,
+        message: "Reward approved successfully",
+        data: result,
+
+    })
+})
 
 export const CustomerController = {
     getAllCustomer,
-    singleUser
+    singleUser,
+    approvedReward
 }

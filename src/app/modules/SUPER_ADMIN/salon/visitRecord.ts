@@ -95,7 +95,14 @@ export const visitSalon = async (salonId: string, userId: string) => {
     const reward = await ViewReward.findOneAndUpdate(
         { userId, salonId },
         {
-            $inc: { pendingCoins: coinsToAdd, viewCount: 1, totalCoins: coinsToAdd },
+            $inc: {
+                pendingCoins: coinsToAdd,
+                viewCount: 1,
+                totalCoins: coinsToAdd,
+                everyVisitCoins: rules.everyVisitCoins,
+                timeZoneBonusCoins: isInTimeZone ? rules.timeZoneGetCoin : 0,
+                totalVisitBonusCoins: isTotalVisitBonus ? rules.totalVisitGetCoin : 0,
+            },
             $set: {
                 status: IStatus.PENDING,
                 lastVisitAt: new Date(),

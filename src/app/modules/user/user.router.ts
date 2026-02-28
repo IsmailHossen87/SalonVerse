@@ -20,7 +20,7 @@ router
     .patch(checkAuth(...allUser), fileUploadHandler(), parseFormDataMiddleware, userController.updateUser)
     .post(fileUploadHandler(), parseFormDataMiddleware, userController.createUser);
 
-router.route("/:id").get(checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER), userController.userDetails);
+router.route("/details").get(checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), userController.userDetails);
 router.route("/delete").delete(checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER), userController.deleteUser);
 
 export const userRouter = router;

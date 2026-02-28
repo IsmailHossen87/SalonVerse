@@ -79,8 +79,6 @@ const approveVisitCoin = async (id: string, userId: string) => {
         await rewardOwner.updateOne({ $inc: { coins: visit.pendingCoins } })
         await visit.updateOne({ pendingCoins: 0 })
 
-        console.log("VISITOR", visit)
-
         await PointIssuedHistory.create({
             userId: visit.userId,
             salonId: visit.salonId,

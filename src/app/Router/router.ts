@@ -3,12 +3,12 @@ import { userRouter } from "../modules/user/user.router";
 import { SalonRoutes } from "../modules/SUPER_ADMIN/salon/salon.router";
 import { authRouter } from "../modules/auth/auth.router";
 import { RuleRoute } from "../modules/Setting/rule/rule.route";
-import { InviteRoutes } from "../modules/invite/invite.router";
 import { ReferralRouter } from "../modules/referral/referral.router";
 import { salonRewardRouter } from "../modules/ADMIN/salonReward/salonReward.router";
 import { VisitRoutes } from "../modules/ADMIN/visit/visit.router";
 import { CustomerRoutes } from "../modules/ADMIN/customer/customer.router";
 import { DashboardRouter } from "../modules/ADMIN/dashboard/dashboard.router";
+import { RewardRouter } from "../modules/reward/reward.router";
 
 const router = Router();
 
@@ -30,10 +30,6 @@ const apiRoutes = [
         router: RuleRoute
     },
     {
-        path: "/invite",
-        router: InviteRoutes
-    },
-    {
         path: "/referral",
         router: ReferralRouter
     },
@@ -52,7 +48,11 @@ const apiRoutes = [
     {
         path: "/dashboard",
         router: DashboardRouter
-    }
+    },
+    {
+        path: "/reward",
+        router: RewardRouter
+    },
 ]
 
 

@@ -23,9 +23,7 @@ export const checkAuth = (...authRoles: string[]) => async (req: Request, res: R
 
         const verifyedToken = verifyToken(accessToken, envVar.JWT_SECRET) as JwtPayload
 
-
-
-        const isUserExites = await UserModel.findOne({ email: verifyedToken.email })
+        const isUserExites = await UserModel.findOne({ _id: verifyedToken.userId })
 
         if (!isUserExites) {
             throw new AppError(httpStatus.BAD_REQUEST, "User  does not Exit")
@@ -42,7 +40,7 @@ export const checkAuth = (...authRoles: string[]) => async (req: Request, res: R
 
 
         if (!authRoles.includes(verifyedToken.role)) {
-            throw new AppError(httpStatus.BAD_REQUEST, "Your are not Permitted to view this route")
+            throw new AppError(httpStatus.FORBIDDEN, "Your are not Permitted to view this route")
         }
         // global authentication er jonno
         req.user = verifyedToken

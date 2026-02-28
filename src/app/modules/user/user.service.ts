@@ -7,10 +7,11 @@ import { IAuthProvider, IStatus, IUser, USER_ROLE } from "./user.interface";
 import unlinkFile from "../../shared/unLinkFile";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import generateNumber from "../../utils/generate";
-import { Reward } from "../reward/reward.model";
+import { Reward, ViewReward } from "../reward/reward.model";
 import mongoose from "mongoose";
 import { verifyOTPService } from "../OTP/OTP.service";
 import { sendOTP } from "../../middleware/twilio";
+import { Rule } from "../Setting/rule/rule.model";
 
 
 // ✅ Step 1: OTP পাঠাও
@@ -96,10 +97,10 @@ export const createUser = async (payload: any) => {
 
         /* ================= OTP VERIFY ================= */
 
-        await verifyOTPService(
-            phoneNumber,
-            otp,
-        );
+        // await verifyOTPService(
+        //     phoneNumber,
+        //     otp,
+        // );
 
         /* ================= ONE ACCOUNT PER PHONE ================= */
 
@@ -144,11 +145,7 @@ export const createUser = async (payload: any) => {
                 { new: true, session }
             );
 
-            if (
-                updatedInviter &&
-                typeof updatedInviter.successfulInvites === "number" &&
-                updatedInviter.successfulInvites % 3 === 0
-            ) {
+            if (updatedInviter && typeof updatedInviter.successfulInvites === "number" && updatedInviter.successfulInvites % 3 === 0) {
                 await Reward.create(
                     [
                         {
@@ -159,6 +156,7 @@ export const createUser = async (payload: any) => {
                             expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
                             isUsed: false,
                             source: "SYSTEM",
+                            status: IStatus.PENDING,
                             createdAt: new Date(),
                         },
                     ],
@@ -217,8 +215,34 @@ const userDetails = async (userId: string) => {
     if (!result) {
         throw new AppError(httpStatus.BAD_REQUEST, "User not found");
     }
-    return result;
+
+    const totalVisit = await ViewReward.aggregate([
+        {
+            $match: {
+                userId: result._id,
+                status: IStatus.APPROVED
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalVisit: { $sum: '$viewCount' },
+                lastVisit: { $max: "$lastVisitAt" }
+            }
+        }
+    ])
+    const totalVisitValue = totalVisit.length > 0 ? totalVisit[0].totalVisit : 0;
+    const lastVisit = totalVisit.length > 0 ? totalVisit[0].lastVisit : 0;
+
+    const tire = await Rule.findOne({ ruleType: 'rewardRule' })
+
+
+
+
+
+    return { ...result.toObject(), TotalVisit: totalVisitValue, LastVisit: lastVisit };
 };
+
 
 const deleteUser = async (owner: JwtPayload, userId?: string, password?: string) => {
     if (owner.role === USER_ROLE.USER) {

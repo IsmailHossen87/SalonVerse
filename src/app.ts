@@ -5,7 +5,7 @@ import { notFound } from "./app/middleware/notFound";
 import router from "./app/Router/router";
 import webhookHandler from './app/modules/stripe/webhookHandler';
 import { UserModel } from './app/modules/user/user.model';
-import { startCheckSubscriptionCron } from './app/modules/Setting/Corn/allCorn';
+import { startCheckSubscriptionCron, startRewardExpireCron } from './app/modules/Setting/Corn/allCorn';
 
 
 const app = express()
@@ -69,6 +69,7 @@ app.get("/", (req, res) => {
     );
 })
 startCheckSubscriptionCron()
+startRewardExpireCron()
 
 app.use(globalErrorHandlare)
 app.use(notFound)

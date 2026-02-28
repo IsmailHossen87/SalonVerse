@@ -7,8 +7,6 @@ const getMyReferralLink = async (req: Request, res: Response) => {
 
         const userId = req.user.userId;
 
-        console.log("userId", userId)
-
         const result = await ReferralService.getMyReferralLink(userId);
 
         res.status(200).json({

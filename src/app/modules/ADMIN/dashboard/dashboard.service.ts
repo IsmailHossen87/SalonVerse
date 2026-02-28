@@ -67,7 +67,7 @@ const getDashboard = async (user: JwtPayload) => {
         {
             $group: {
                 _id: null,
-                totalPoints: { $sum: "$totalPoints" }, // field name দিতে হবে string আকারে
+                totalPoints: { $sum: "$totalPoints" },
             },
         },
     ]);

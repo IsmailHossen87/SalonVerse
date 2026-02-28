@@ -6,41 +6,6 @@
     "auditLog": "C:\\ISMAIL\\Salem\\winston\\error\\.c7d0fb4b3158f3732e14444c8c762de431cb7c58-audit.json",
     "files": [
         {
-            "date": 1771646077762,
-            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-09-error.log",
-            "hash": "86d4a682a5d3220d1db8966e38e0f4bc4d3781b81734c4637f34a993c21322f4"
-        },
-        {
-            "date": 1771646914417,
-            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-10-error.log",
-            "hash": "3a0d55f77ab4836447b06b7e55c6e8b2a0ff27767e13ccf5a662f132d3580b1d"
-        },
-        {
-            "date": 1771650069663,
-            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-11-error.log",
-            "hash": "59259f350245fd2b498cb78574af6c1aa27a4221a0e01529e18ed00b74fd7ab5"
-        },
-        {
-            "date": 1771653927938,
-            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-12-error.log",
-            "hash": "1f545a835a1ded7e5280b040ded23dea6225c784830ced1ad94a152025f10788"
-        },
-        {
-            "date": 1771657268418,
-            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-13-error.log",
-            "hash": "3ca2c37a7e7c9ab5a6a77909057991c04fa96305dfb72de66ced7c78cc4243d0"
-        },
-        {
-            "date": 1771660885260,
-            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-14-error.log",
-            "hash": "ca5a71dddd3e250827b1a675947f08dc87955be1e88ef226173070faf776cdde"
-        },
-        {
-            "date": 1771664415428,
-            "name": "C:\\ISMAIL\\Salem\\winston\\error\\21-02-2026-15-error.log",
-            "hash": "d2ed9c9b2ccf8f290d60f3cd0346caa2bde4e58bf65f4918a0a6ef5cc15a1ad0"
-        },
-        {
             "date": 1771727620961,
             "name": "C:\\ISMAIL\\Salem\\winston\\error\\22-02-2026-08-error.log",
             "hash": "24e2de6bf9add7594b2f0c200928156417e88fbefb331c921d4ec68f3794b7fd"
@@ -214,6 +179,41 @@
             "date": 1772100135439,
             "name": "C:\\ISMAIL\\Salem\\winston\\error\\26-02-2026-16-error.log",
             "hash": "68a250308a0998293d9f787719e24af6224b3d5e91df27ee414f616d3e609510"
+        },
+        {
+            "date": 1772250255487,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\28-02-2026-09-error.log",
+            "hash": "f45b386ec7f523991960376800ecedc353eedf920e39d95ca2912c4a08f4c282"
+        },
+        {
+            "date": 1772251220431,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\28-02-2026-10-error.log",
+            "hash": "b9852f51fb4b18905848b0cc608a5ee81641660fa7c7d18d180349fa92d2a1ac"
+        },
+        {
+            "date": 1772255670227,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\28-02-2026-11-error.log",
+            "hash": "5a77c3d4650a4ccb40174eaa5954ec6c47b59c96bee86d43348e5868de98bb97"
+        },
+        {
+            "date": 1772258405538,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\28-02-2026-12-error.log",
+            "hash": "931cb55a3d3400f6bfea9e9cee0b51488db2a4bcdb9524ddd39f48a666851aff"
+        },
+        {
+            "date": 1772265412410,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\28-02-2026-13-error.log",
+            "hash": "83ecbc1eedd97b0f8233768265cbfa138a4968f5914a065403fb899057cefdb8"
+        },
+        {
+            "date": 1772265911211,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\28-02-2026-14-error.log",
+            "hash": "613d19662188f59f719de7a98cd68e40eb8aaa7217044a5ecd873087f47c0f3f"
+        },
+        {
+            "date": 1772269574595,
+            "name": "C:\\ISMAIL\\Salem\\winston\\error\\28-02-2026-15-error.log",
+            "hash": "fd3e9de35baa32bcfd8a68ee5d322e7ad0e8fcead081b744a9593210233b48ef"
         }
     ],
     "hashType": "sha256"

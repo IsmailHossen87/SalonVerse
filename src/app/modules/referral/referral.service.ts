@@ -1,6 +1,4 @@
 // referral.service.ts
-
-import { envVar } from "../../config/env";
 import { UserModel } from "../user/user.model";
 
 
@@ -12,11 +10,9 @@ const getMyReferralLink = async (userId: string) => {
         throw new Error("User not found");
     }
 
-    const referralLink = `${envVar.FRONTEND_URL}/signup?ref=${user.referralCode}`;
 
     return {
         referralCode: user.referralCode,
-        referralLink
     };
 };
 
