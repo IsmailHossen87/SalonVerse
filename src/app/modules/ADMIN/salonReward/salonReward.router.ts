@@ -25,6 +25,10 @@ router.route("/global-reward")
 router.route("/claim/:id")
     .post(checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.claimReward))
 
+router.get("/purchase-view-history/:id", checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.getViewHistory))  //after view and admin approved
+
+router.route("/purchase-reward-history/:id")
+    .get(checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.getPurchaseRewardHistory))
 
 
 router.route("/:id")

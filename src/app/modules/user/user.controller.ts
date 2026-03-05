@@ -72,6 +72,16 @@ const deleteUser = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getUserCoins = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user.userId as string;
+    const result = await userService.getUserCoins(userId);
+    res.status(200).json({
+        success: true,
+        message: "User coins fetched successfully",
+        data: result,
+    });
+});
+
 export const userController = {
     sendOTP,
     createUser,
@@ -79,4 +89,5 @@ export const userController = {
     updateUser,
     userDetails,
     deleteUser,
+    getUserCoins,
 };

@@ -2,7 +2,6 @@
 import { NextFunction, Request, Response } from "express";
 import { Types } from "mongoose";
 import catchAsync from "../../../utils/catchAsync";
-import { InviteService } from "../../invite/invite.service";
 import { VisitService } from "./visit.service";
 
 

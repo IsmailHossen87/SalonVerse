@@ -27,7 +27,7 @@ const getAllVisitRecord = async (query: any) => {
         mongoQuery.salonId = salon._id
     }
 
-    const result = ViewReward.find(mongoQuery).populate("userId", "name  phoneNumber").populate("salonId", "service ").sort({ updatedAt: -1 });
+    const result = ViewReward.find(mongoQuery).populate("userId", "name  phoneNumber").populate("salonId", "service businessName location").sort({ updatedAt: -1 });
 
     const queryBuilder = new QueryBuilder(result, rest)
         .search(['name'])
@@ -43,11 +43,15 @@ const getAllVisitRecord = async (query: any) => {
         throw new AppError(httpStatus.NOT_FOUND, "No visit history found");
     }
 
+    console.log(data)
+
     const resultData = data?.map((item: any) => {
         return {
             user: item.userId.name || 'N/A',
             lastView: item.lastVisitAt,
             totalVisit: item.totalVisit,
+            salonName: item.salonId.businessName,
+            location: item.salonId.location,
             totalPoint: item.pendingCoins,
             serviceName: item.salonId.service,
             status: item.status,

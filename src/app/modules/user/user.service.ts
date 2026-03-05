@@ -286,6 +286,14 @@ const userDeleteFunc = async (userId: string, status: IStatus) => {
     return result;
 };
 
+const getUserCoins = async (userId: string) => {
+    const result = await UserModel.findById(userId).select("coins");
+    if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+    return result;
+};
+
 export const userService = {
     sendRegistrationOTP, // ✅ নতুন
     createUser,
@@ -293,4 +301,5 @@ export const userService = {
     updateUser,
     userDetails,
     deleteUser,
+    getUserCoins,
 };

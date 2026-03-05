@@ -75,7 +75,12 @@ const activeReward = async (userId: string, type: string, query: Record<string, 
     })
     const rewardData = rewards.length > 0 ? rewards : [];
 
-    return { meta, data: { ...data, rewards: rewardData } };
+    return {
+        meta, data: {
+            purchases: Array.isArray(data) ? data : [],
+            rewards: rewardData
+        }
+    };
 };
 
 

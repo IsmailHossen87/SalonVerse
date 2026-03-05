@@ -63,11 +63,13 @@ const claimReward = catchAsync(async (req: Request, res: Response, next: NextFun
 
 const globalReward = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user.userId;
-    const result = await salonRewardService.globalReward(user as string);
+    const query = req.query;
+    const result = await salonRewardService.globalReward(user as string, query);
     res.status(200).json({
         success: true,
         message: "Global reward created successfully",
-        data: result,
+        data: result.data,
+        meta: result.meta,
     });
 });
 
@@ -93,6 +95,27 @@ const getAllRedemption = catchAsync(async (req: Request, res: Response, next: Ne
         data: result.data,
     });
 });
+
+const getPurchaseRewardHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user.userId;
+    const result = await salonRewardService.getPurchaseRewardHistory(req.params.id as string, user as string);
+    res.status(200).json({
+        success: true,
+        message: "Purchase reward history fetched successfully",
+        data: result,
+    });
+});
+
+const getViewHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user.userId;
+    const result = await salonRewardService.getViewHistory(req.params.id as string, user as string);
+    res.status(200).json({
+        success: true,
+        message: "View history fetched successfully",
+        data: result,
+    });
+});
+
 export const salonRewardController = {
     createSalonReward,
     getAllSalonReward,
@@ -101,5 +124,7 @@ export const salonRewardController = {
     claimReward,
     globalReward,
     approveRedemption,
-    getAllRedemption
+    getAllRedemption,
+    getPurchaseRewardHistory,
+    getViewHistory
 };

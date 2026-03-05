@@ -13,7 +13,10 @@ const activeReward = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: `Get ${type} retrived Reward`,
         meta: result.meta,
-        data: { ...result.data, rewards: result.data.rewards },
+        data: {
+            purchases: result.data.purchases,
+            rewards: result.data.rewards
+        },
     });
 });
 

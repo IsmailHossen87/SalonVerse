@@ -6,8 +6,8 @@ import { RewardSalonModel } from "./salonReward.model";
 import { SalonModel } from "../../SUPER_ADMIN/salon/salon.model";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
 import unlinkFile from "../../../shared/unLinkFile";
-import { PurchaseReward, ViewReward } from "../../reward/reward.model";
-import { Types } from "mongoose";
+import { PointIssuedHistory, PurchaseReward, ViewReward } from "../../reward/reward.model";
+import mongoose, { Types } from "mongoose";
 // reward.service.ts
 const createReward = async (payload: any, userId: string) => {
     const user = await UserModel.findById(userId);
@@ -70,7 +70,7 @@ const getAllSalonReward = async (query: any) => {
 
 }
 
-const globalReward = async (userId: string) => {
+const globalReward = async (userId: string, query: any) => {
     const user = await UserModel.findById(userId);
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, "User not found");
@@ -89,7 +89,7 @@ const globalReward = async (userId: string) => {
     const reward = RewardSalonModel.find({ salonId: { $in: salonIds } });
 
 
-    const queryBuilder = new QueryBuilder(reward, {})
+    const queryBuilder = new QueryBuilder(reward, query)
         .search(["rewardName", "service", "description", "redemptionPolicy", "rewardStatus"])
         .filter()
         .sort()
@@ -115,6 +115,7 @@ const globalReward = async (userId: string) => {
             // remove openingTime
             openingTime: undefined,
             closedDays,
+            VisitorCoin: user.coins
         };
     });
 
@@ -296,7 +297,63 @@ const approveRedemption = async (id: string, userId: string) => {
     return `Reward ${status} successfully`;
 }
 
+const getPurchaseRewardHistory = async (id: string, userId: string) => {
 
+    const reward = await PurchaseReward.find({ rewardId: new mongoose.Types.ObjectId(id), userId: new mongoose.Types.ObjectId(userId) });
+
+    if (!reward) throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
+
+    const total = await PurchaseReward.aggregate([
+        {
+            $match: { rewardId: new mongoose.Types.ObjectId(id), userId: new mongoose.Types.ObjectId(userId) }
+        },
+        {
+            $group: {
+                _id: null,
+                totalPointReedem: { $sum: "$pointCost" }
+            }
+        }
+    ])
+
+    return { ...reward, totalPointReedem: total[0]?.totalPointReedem || 0 }
+    // return reward
+}
+
+const getViewHistory = async (id: string, userId: string) => {
+
+    const reward = await PointIssuedHistory.find({
+        salonId: new mongoose.Types.ObjectId(id),
+        userId: new mongoose.Types.ObjectId(userId)
+    })
+        .populate({ path: "userId", select: "phoneNumber" })
+        .populate({ path: "salonId", select: "businessName location service" });
+
+    if (reward.length === 0) {
+        throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
+    }
+
+    // Cast populated data
+    const salonData = reward[0].salonId as any;
+
+    // Salon info (only once)
+    const salon = {
+        businessName: salonData?.businessName || '',
+        location: salonData?.location || '',
+        service: salonData?.service || ''
+    };
+
+    // History list
+    const history = reward.map((item: any) => ({
+        _id: item._id,
+        points: item?.points || 0,
+        createdAt: item?.createdAt
+    }));
+
+    return {
+        salon,
+        history
+    };
+};
 
 export const salonRewardService = {
     createReward,
@@ -306,5 +363,7 @@ export const salonRewardService = {
     claimReward,
     approveRedemption,
     getAllRedemption,
-    globalReward
+    globalReward,
+    getPurchaseRewardHistory,
+    getViewHistory
 }

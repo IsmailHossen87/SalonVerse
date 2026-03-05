@@ -13,6 +13,7 @@ const allUser = [USER_ROLE.SUPER_ADMIN, USER_ROLE.USER];
 
 // ✅ নতুন route: OTP পাঠানো
 router.post("/send-otp", userController.sendOTP);
+router.get("/coins", checkAuth(USER_ROLE.USER), userController.getUserCoins);
 
 router
     .route("/")
