@@ -61,6 +61,16 @@ const claimReward = catchAsync(async (req: Request, res: Response, next: NextFun
     });
 });
 
+const globalReward = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user.userId;
+    const result = await salonRewardService.globalReward(user as string);
+    res.status(200).json({
+        success: true,
+        message: "Global reward created successfully",
+        data: result,
+    });
+});
+
 // 🛄🛄🛄 clain reward
 const approveRedemption = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user.userId;
@@ -89,6 +99,7 @@ export const salonRewardController = {
     getSingleSalonReward,
     updateSalonReward,
     claimReward,
+    globalReward,
     approveRedemption,
     getAllRedemption
 };

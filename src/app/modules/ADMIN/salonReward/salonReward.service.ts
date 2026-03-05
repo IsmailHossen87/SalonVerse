@@ -6,7 +6,8 @@ import { RewardSalonModel } from "./salonReward.model";
 import { SalonModel } from "../../SUPER_ADMIN/salon/salon.model";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
 import unlinkFile from "../../../shared/unLinkFile";
-import { PurchaseReward } from "../../reward/reward.model";
+import { PurchaseReward, ViewReward } from "../../reward/reward.model";
+import { Types } from "mongoose";
 // reward.service.ts
 const createReward = async (payload: any, userId: string) => {
     const user = await UserModel.findById(userId);
@@ -67,6 +68,57 @@ const getAllSalonReward = async (query: any) => {
 
     return { data: salonsWithClosedDays, meta }
 
+}
+
+const globalReward = async (userId: string) => {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    const userViewReward = await ViewReward.find({ userId: userId });
+
+    if (userViewReward.length === 0) {
+        throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
+    }
+
+    // Extract salonIds
+    const salonIds = userViewReward.map(item => item.salonId).filter((id): id is Types.ObjectId => !!id);
+
+    // Find salons in RewardSalonModel
+    const reward = RewardSalonModel.find({ salonId: { $in: salonIds } });
+
+
+    const queryBuilder = new QueryBuilder(reward, {})
+        .search(["rewardName", "service", "description", "redemptionPolicy", "rewardStatus"])
+        .filter()
+        .sort()
+        .paginate()
+        .fields()
+
+    const [data, meta] = await Promise.all([
+        queryBuilder.build(), queryBuilder.getMeta()
+    ]);
+
+    const salon = await Promise.all(data.map(async (item: any) => {
+        const salon = await SalonModel.findById(item.salonId);
+        return { ...item.toObject(), openingTime: salon?.openingTime }
+    }))
+
+    const salonsWithClosedDays = salon.map((item: any) => {
+        const closedDays = item.openingTime?.filter(
+            (day: any) => day.isClosed === true
+        );
+
+        return {
+            ...item,
+            // remove openingTime
+            openingTime: undefined,
+            closedDays,
+        };
+    });
+
+    return { data: salonsWithClosedDays, meta }
 }
 
 const getSingleSalonReward = async (id: string, userId: string) => {
@@ -253,5 +305,6 @@ export const salonRewardService = {
     updateSalonReward,
     claimReward,
     approveRedemption,
-    getAllRedemption
+    getAllRedemption,
+    globalReward
 }

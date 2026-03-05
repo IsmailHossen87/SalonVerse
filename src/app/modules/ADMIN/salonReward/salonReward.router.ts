@@ -17,10 +17,15 @@ router.route("/")
 
 //  Redemption like Reward Approve and get
 router.route("/redemption")
-    .get(checkAuth(USER_ROLE.OWNER, USER_ROLE.SUPER_ADMIN), catchAsync(salonRewardController.getAllRedemption))
+    .get(checkAuth(USER_ROLE.OWNER, USER_ROLE.SUPER_ADMIN, USER_ROLE.USER), catchAsync(salonRewardController.getAllRedemption))
+
+router.route("/global-reward")
+    .get(checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.globalReward))
 
 router.route("/claim/:id")
     .post(checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.claimReward))
+
+
 
 router.route("/:id")
     .get(checkAuth(USER_ROLE.OWNER, USER_ROLE.USER, USER_ROLE.SUPER_ADMIN), catchAsync(salonRewardController.getSingleSalonReward))
