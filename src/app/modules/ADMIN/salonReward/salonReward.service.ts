@@ -26,6 +26,7 @@ const createReward = async (payload: any, userId: string) => {
 }
 
 const getAllSalonReward = async (query: any) => {
+
     const { salons, ...rest } = query
     let mongoQuery: any = {}
 
@@ -46,7 +47,25 @@ const getAllSalonReward = async (query: any) => {
         queryBuilder.build(), queryBuilder.getMeta()
     ]);
 
-    return { data, meta }
+    const salon = await Promise.all(data.map(async (item: any) => {
+        const salon = await SalonModel.findById(item.salonId);
+        return { ...item.toObject(), openingTime: salon?.openingTime }
+    }))
+
+    const salonsWithClosedDays = salon.map((item: any) => {
+        const closedDays = item.openingTime?.filter(
+            (day: any) => day.isClosed === true
+        );
+
+        return {
+            ...item,
+            // remove openingTime
+            openingTime: undefined,
+            closedDays,
+        };
+    });
+
+    return { data: salonsWithClosedDays, meta }
 
 }
 

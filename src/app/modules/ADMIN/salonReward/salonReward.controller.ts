@@ -57,8 +57,7 @@ const claimReward = catchAsync(async (req: Request, res: Response, next: NextFun
     const result = await salonRewardService.claimReward(req.params.id as string, user as string);
     res.status(200).json({
         success: true,
-        message: "Salon reward clain successfully",
-        data: result,
+        message: result,
     });
 });
 

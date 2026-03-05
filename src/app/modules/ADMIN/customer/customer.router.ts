@@ -11,7 +11,7 @@ router.route("/")
 
 
 router.route("/:id")
-    .get(checkAuth(USER_ROLE.OWNER, USER_ROLE.SUPER_ADMIN), CustomerController.singleUser)
+    .get(checkAuth(USER_ROLE.OWNER, USER_ROLE.SUPER_ADMIN, USER_ROLE.USER), CustomerController.singleUser)
 
 router.route("/approved-reward/:id")
     .patch(checkAuth(USER_ROLE.OWNER, USER_ROLE.SUPER_ADMIN), CustomerController.approvedReward)

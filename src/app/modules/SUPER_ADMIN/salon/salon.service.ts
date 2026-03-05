@@ -7,7 +7,8 @@ import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { generateHashCode } from "../../../utils/generate";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
 import { visitSalon } from "./visitRecord";
-import { ViewReward } from "../../reward/reward.model";
+import { Reward, ViewReward } from "../../reward/reward.model";
+import { RewardSalonModel } from "../../ADMIN/salonReward/salonReward.model";
 
 const createSalon = async (payload: any, user: string) => {
     const superAdmin = await UserModel.findById(user);
@@ -75,8 +76,14 @@ const getAllSalon = async (query: any) => {
             return { ...salon.toObject(), visitor }
         })
     )
+    const injectIsRewardAvailable = await Promise.all(
+        allData.map(async (salon) => {
+            const reward = await RewardSalonModel.findOne({ salonId: salon._id });
+            return { ...salon, isRewardAvailable: !!reward }
+        })
+    )
 
-    return { allData, meta };
+    return { allData: injectIsRewardAvailable, meta };
 
 };
 

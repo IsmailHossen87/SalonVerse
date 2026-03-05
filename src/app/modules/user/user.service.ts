@@ -233,6 +233,7 @@ const userDetails = async (userId: string) => {
     ])
     const totalVisitValue = totalVisit.length > 0 ? totalVisit[0].totalVisit : 0;
     const lastVisit = totalVisit.length > 0 ? totalVisit[0].lastVisit : 0;
+    const availableReward = await Reward.find({ userId: result._id, status: IStatus.PENDING });
 
     const tire = await Rule.findOne({ ruleType: 'rewardRule' })
 
@@ -240,7 +241,7 @@ const userDetails = async (userId: string) => {
 
 
 
-    return { ...result.toObject(), TotalVisit: totalVisitValue, LastVisit: lastVisit };
+    return { ...result.toObject(), TotalVisit: totalVisitValue, LastVisit: lastVisit, availableReward };
 };
 
 

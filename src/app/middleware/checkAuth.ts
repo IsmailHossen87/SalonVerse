@@ -10,12 +10,12 @@ import AppError from "../errorHalper.ts/AppError";
 export const checkAuth = (...authRoles: string[]) => async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const accessToken = req.headers.authorization;
-        // const tokenWithBearer = req.headers.authorization;
-        // if(!tokenWithBearer){
-        //     throw new AppError(httpStatus.BAD_REQUEST, "No Token Recieved")
-        // }
-        // const accessToken = tokenWithBearer.split(' ')[1];     // tokenWithBearer.startsWith('Bearer')
+        // const accessToken = req.headers.authorization;
+        const tokenWithBearer = req.headers.authorization;
+        if (!tokenWithBearer) {
+            throw new AppError(httpStatus.BAD_REQUEST, "No Token Recieved")
+        }
+        const accessToken = tokenWithBearer.split(' ')[1];     // tokenWithBearer.startsWith('Bearer')
 
         if (!accessToken) {
             throw new AppError(httpStatus.BAD_REQUEST, "No Token Recieved")
