@@ -26,6 +26,7 @@ export const UserSchema = new Schema<IUser>({
     auths: [authProviderSchema],
     verified: { type: Boolean, default: false, },
     status: { type: String, enum: Object.values(IStatus), default: IStatus.PENDING, },
+    notification: { type: Boolean, default: false },
     isVibrationNotificationEnabled: { type: Boolean, default: true, },
     isSoundNotificationEnabled: { type: Boolean, default: true, },
     fcmToken: { type: String, select: false },

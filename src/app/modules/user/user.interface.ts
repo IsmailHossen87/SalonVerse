@@ -51,6 +51,7 @@ export interface IUser {
 
     secretRefreshToken?: [string]
     dateOfBirth?: Date;
+    notification: boolean;
     isVibrationNotificationEnabled?: boolean;
     isSoundNotificationEnabled?: boolean;
     fcmToken?: string; //for firebase cloud messaging

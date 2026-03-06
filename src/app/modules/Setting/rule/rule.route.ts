@@ -1,7 +1,5 @@
 import express from 'express';
 import { RuleController } from './rule.controller';
-import { RuleValidation } from './rule.validation';
-import { validateRequest } from '../../../middleware/validateRequest';
 import { checkAuth } from '../../../middleware/checkAuth';
 import { USER_ROLE } from '../../user/user.interface';
 
@@ -10,6 +8,10 @@ const router = express.Router();
 router
      .route('/global')
      .put(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.globalRule)
+
+router.route("/tire")
+     .post(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.tireRule)
+     .get(RuleController.allTire)
 
 router.route("/smart").put(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.smartRule)
 router.route("/reward").put(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.rewardRule)

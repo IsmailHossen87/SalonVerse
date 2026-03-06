@@ -17,11 +17,6 @@ const ruleSchema = new Schema<IRule>(
           totalVist: { type: Number, },
           totalVisitGetCoin: { type: Number, },
           inviteEarCoin: { type: Number, },
-
-
-          tireName: { type: String, trim: true, },
-          tireLevel: { type: Number, },
-          tireCoins: { type: Number, },
      },
      {
           timestamps: true,
@@ -29,3 +24,18 @@ const ruleSchema = new Schema<IRule>(
 );
 
 export const Rule = model<IRule>('Rule', ruleSchema);
+
+
+const tireSchema = new Schema(
+     {
+          userId: { type: Schema.Types.ObjectId, ref: "User" },
+          tireName: { type: String, trim: true },
+          tireCoins: { type: Number, },
+     },
+     {
+          timestamps: true,
+     }
+);
+
+
+export const Tire = model('Tire', tireSchema);

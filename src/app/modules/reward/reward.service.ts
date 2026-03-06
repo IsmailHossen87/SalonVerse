@@ -56,7 +56,7 @@ const activeReward = async (userId: string, type: string, query: Record<string, 
     })
         .populate({ path: "userId", select: "name phoneNumber coins" })
         .populate({ path: "salonId", select: "businessName service image" })
-        .populate({ path: "rewardId", select: "rewardPoints rewardName" }).sort({ createdAt: -1 })
+        .populate({ path: "rewardId", select: "rewardPoints rewardName rewardImage " }).sort({ createdAt: -1 })
 
     const result = new QueryBuilder(queryBuilder, query).paginate().sort().search([]).filter()
 

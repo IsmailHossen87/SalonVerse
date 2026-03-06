@@ -82,9 +82,37 @@ const getRule = catchAsync(async (req: Request, res: Response) => {
      });
 });
 
+
+const tireRule = catchAsync(async (req: Request, res: Response) => {
+     const { tireName, tireCoins } = req.body;
+
+
+     const result = await RuleService.tireRule({ tireName, tireCoins }, req.user?.userId as string);
+
+     sendResponse(res, {
+          success: true,
+          statusCode: StatusCodes.OK,
+          message: 'Tire  created successfully',
+          data: result,
+     });
+});
+
+
+const allTire = catchAsync(async (req: Request, res: Response) => {
+     const result = await RuleService.getTire();
+
+     sendResponse(res, {
+          success: true,
+          statusCode: StatusCodes.OK,
+          message: 'Content upserted successfully',
+          data: result,
+     });
+})
 export const RuleController = {
      globalRule,
      smartRule,
      rewardRule,
-     getRule
+     getRule,
+     tireRule,
+     allTire
 }
