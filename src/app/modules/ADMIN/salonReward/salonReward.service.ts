@@ -8,6 +8,8 @@ import { QueryBuilder } from "../../../utils/QueryBuilder";
 import unlinkFile from "../../../shared/unLinkFile";
 import { PointIssuedHistory, PurchaseReward, ViewReward } from "../../reward/reward.model";
 import mongoose, { Types } from "mongoose";
+import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
 // reward.service.ts
 const createReward = async (payload: any, userId: string) => {
     const user = await UserModel.findById(userId);
@@ -172,6 +174,17 @@ const claimReward = async (id: string, userId: string) => {
     await UserModel.findByIdAndUpdate(visitorUser._id, {
         $inc: { coins: -reward.rewardPoints }
     });
+    if (visitorUser.fcmToken) {
+        await firebaseNotificationBuilder({
+            user: visitorUser,
+            title: "You've successfully claimed a reward",
+            body: "You've successfully claimed a reward",
+            notificationEvent: INOTIFICATION_EVENT.CLAIM_REWARD,
+            notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+            referenceId: visitorUser._id,
+            referenceType: "User"
+        })
+    }
 
     return `${reward.rewardName} claimed successfully`;
 }

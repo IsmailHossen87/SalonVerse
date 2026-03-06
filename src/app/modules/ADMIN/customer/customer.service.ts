@@ -6,6 +6,8 @@ import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { UserModel } from "../../user/user.model";
 import httpStatus from "http-status-codes";
 import mongoose from "mongoose";
+import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
 
 // customer.service.ts
 const getAllCustomer = async (query: any, userId: string) => {
@@ -94,6 +96,19 @@ const approvedReward = async (userId: string, reqUser: JwtPayload) => {
     if (!reward) throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
 
     reward.status = IStatus.APPROVED;
+    const rewardOwnerUser = await UserModel.findById(reward.userId);
+    if (!rewardOwnerUser) throw new AppError(httpStatus.NOT_FOUND, "Reward owner not found");
+    if (rewardOwnerUser.fcmToken) {
+        await firebaseNotificationBuilder({
+            user: rewardOwnerUser,
+            title: "You've successfully approved a reward",
+            body: "You've successfully approved a reward",
+            notificationEvent: INOTIFICATION_EVENT.APPROVE_REWARD,
+            notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+            referenceId: userInfo._id,
+            referenceType: "User"
+        })
+    }
     await reward.save();
 
     return reward;

@@ -12,6 +12,8 @@ import mongoose from "mongoose";
 import { verifyOTPService } from "../OTP/OTP.service";
 import { sendOTP } from "../../middleware/twilio";
 import { Rule } from "../Setting/rule/rule.model";
+import { firebaseNotificationBuilder } from "../../shared/sendNotification";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../notification/notification.interface";
 
 
 // ✅ Step 1: OTP পাঠাও
@@ -163,7 +165,19 @@ export const createUser = async (payload: any) => {
                     { session }
                 );
             }
+            if (inviterUser.fcmToken) {
+                await firebaseNotificationBuilder({
+                    user: inviterUser,
+                    title: "Enjoy a 20 AED reward ",
+                    body: "You can enjoy a 20 AED reward for inviting a new user",
+                    notificationEvent: INOTIFICATION_EVENT.INVITE,
+                    notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+                    referenceId: inviterUser._id,
+                    referenceType: "User"
+                })
+            }
         }
+
 
         await session.commitTransaction();
         session.endSession();

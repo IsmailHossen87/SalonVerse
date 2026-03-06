@@ -1,4 +1,6 @@
 import AppError from "../../../errorHalper.ts/AppError";
+import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
 import { PointIssuedHistory, ViewReward } from "../../reward/reward.model";
 import { Rule } from "../../Setting/rule/rule.model";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
@@ -110,6 +112,17 @@ export const visitSalon = async (salonId: string, userId: string) => {
         },
         { upsert: true, new: true }
     );
+    if (user.fcmToken) {
+        await firebaseNotificationBuilder({
+            user: user,
+            title: "You've successfully visited a salon",
+            body: `You've sucessfully visited a salon and received ${coinsToAdd} coins`,
+            notificationEvent: INOTIFICATION_EVENT.VISIT,
+            notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+            referenceId: user._id,
+            referenceType: "User"
+        })
+    }
 
     return {
         message: `Visit recorded! ${coinsToAdd} coins added`,

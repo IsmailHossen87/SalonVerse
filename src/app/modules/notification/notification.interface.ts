@@ -4,6 +4,10 @@ import { Types } from "mongoose";
 
 export enum INOTIFICATION_EVENT {
     LOGIN = 'LOGIN',
+    VISIT = 'VISIT',
+    INVITE = 'INVITE',
+    APPROVE_REWARD = 'APPROVE_REWARD',
+    CLAIM_REWARD = 'CLAIM_REWARD'
 }
 
 export enum INOTIFICATION_TYPE {
