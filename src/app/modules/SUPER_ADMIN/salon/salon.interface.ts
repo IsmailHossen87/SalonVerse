@@ -34,6 +34,8 @@ export interface ISalon {
     // OWNER SET data
     image: string;
     location: string;
+    lat: string;
+    lon: string;
     service: string;
     description: string;
     openingTime: IOpeningTime[];

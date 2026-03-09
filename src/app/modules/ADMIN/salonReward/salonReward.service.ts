@@ -310,15 +310,29 @@ const approveRedemption = async (id: string, userId: string) => {
     return `Reward ${status} successfully`;
 }
 
-const getPurchaseRewardHistory = async (id: string, userId: string) => {
+const getPurchaseRewardHistory = async (userId: string, query: Record<string, string>) => {
+    const matchQuery: any = { userId: new mongoose.Types.ObjectId(userId) };
 
-    const reward = await PurchaseReward.find({ rewardId: new mongoose.Types.ObjectId(id), userId: new mongoose.Types.ObjectId(userId) });
+    if (query.searchTerm) {
+        const matchingSalons = await SalonModel.find({
+            businessName: { $regex: query.searchTerm, $options: "i" }
+        }).select("_id");
+        const salonIds = matchingSalons.map((s) => s._id);
+        matchQuery.salonId = { $in: salonIds };
+    }
 
+    const reward = PurchaseReward.find(matchQuery).populate({ path: "salonId", select: "businessName service" }).lean();
     if (!reward) throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
+
+    const queryBuilder = new QueryBuilder(reward, query).search([]).filter().sort()
+
+    const [data, meta] = await Promise.all([
+        queryBuilder.build(), queryBuilder.getMeta()
+    ]);
 
     const total = await PurchaseReward.aggregate([
         {
-            $match: { rewardId: new mongoose.Types.ObjectId(id), userId: new mongoose.Types.ObjectId(userId) }
+            $match: { userId: new mongoose.Types.ObjectId(userId) }
         },
         {
             $group: {
@@ -328,9 +342,10 @@ const getPurchaseRewardHistory = async (id: string, userId: string) => {
         }
     ])
 
-    return { ...reward, totalPointReedem: total[0]?.totalPointReedem || 0 }
+    return { meta, reward: data, totalPointReedem: total[0]?.totalPointReedem || 0 }
     // return reward
 }
+
 
 const getViewHistory = async (id: string, userId: string) => {
 

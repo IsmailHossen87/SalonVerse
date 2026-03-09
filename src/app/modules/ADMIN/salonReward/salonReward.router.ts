@@ -22,13 +22,15 @@ router.route("/redemption")
 router.route("/global-reward")
     .get(checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.globalReward))
 
+router.route("/purchase-reward-history")
+    .get(checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.getPurchaseRewardHistory))
+
 router.route("/claim/:id")
     .post(checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.claimReward))
 
 router.get("/purchase-view-history/:id", checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.getViewHistory))  //after view and admin approved
 
-router.route("/purchase-reward-history/:id")
-    .get(checkAuth(USER_ROLE.USER), catchAsync(salonRewardController.getPurchaseRewardHistory))
+
 
 
 router.route("/:id")

@@ -98,11 +98,16 @@ const getAllRedemption = catchAsync(async (req: Request, res: Response, next: Ne
 
 const getPurchaseRewardHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user.userId;
-    const result = await salonRewardService.getPurchaseRewardHistory(req.params.id as string, user as string);
+    const query = req.query
+    const result = await salonRewardService.getPurchaseRewardHistory(user as string, query as Record<string, string>);
     res.status(200).json({
         success: true,
         message: "Purchase reward history fetched successfully",
-        data: result,
+        meta: result.meta,
+        data: {
+            Reward: result.reward,
+            TotalRedeemtion: result.totalPointReedem
+        },
     });
 });
 

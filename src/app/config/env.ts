@@ -20,6 +20,7 @@ interface EnvConfig {
   SUPER_ADMIN_EMAIL: string
   SUPER_ADMIN_PASSWORD: string
   BCRYPT_SALT_ROUTD: string
+  GOOGLE_MAP_KEY: string
 
   TWILIO_ACCOUNT_SID: string
   TWILIO_AUTH_TOKEN: string
@@ -93,7 +94,8 @@ const loadEnvVariable = (): EnvConfig => {
     "BCRYPT_SALT_ROUTD",
     "TWILIO_ACCOUNT_SID",
     "TWILIO_AUTH_TOKEN",
-    "TWILIO_VERIFY_SERVICE_SID"
+    "TWILIO_VERIFY_SERVICE_SID",
+    "GOOGLE_MAP_KEY"
   ]
 
   requiredVariables.forEach((key) => {
@@ -149,7 +151,8 @@ const loadEnvVariable = (): EnvConfig => {
       STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET as string,
       STRIPE_SUCCESS_URL: process.env.STRIPE_SUCCESS_URL as string,
       STRIPE_CANCEL_URL: process.env.STRIPE_CANCEL_URL as string,
-    }
+    },
+    GOOGLE_MAP_KEY: process.env.GOOGLE_MAP_KEY as string,
   }
 }
 

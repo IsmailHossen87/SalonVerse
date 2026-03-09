@@ -6,6 +6,8 @@ import { SalonModel } from "../../SUPER_ADMIN/salon/salon.model";
 import AppError from "../../../errorHalper.ts/AppError";
 import httpStatus from "http-status-codes";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
+import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
 
 // visit.service.ts
 const getAllVisitRecord = async (query: any) => {
@@ -89,6 +91,17 @@ const approveVisitCoin = async (id: string, userId: string) => {
             points: visit.pendingCoins,
         })
 
+        if (rewardOwner.fcmToken) {
+            await firebaseNotificationBuilder({
+                user: rewardOwner,
+                title: "Your visit is approved",
+                body: "Your visit is approved",
+                notificationEvent: INOTIFICATION_EVENT.VISIT,
+                notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+                referenceId: rewardOwner._id,
+                referenceType: "User"
+            })
+        }
     }
     await visit.updateOne({ status })
     return visit

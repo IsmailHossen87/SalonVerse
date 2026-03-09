@@ -9,6 +9,9 @@ import { QueryBuilder } from "../../../utils/QueryBuilder";
 import { visitSalon } from "./visitRecord";
 import { Reward, ViewReward } from "../../reward/reward.model";
 import { RewardSalonModel } from "../../ADMIN/salonReward/salonReward.model";
+import axios from "axios";
+import { envVar } from "../../../config/env";
+import { getDistance } from "./distance";
 
 const createSalon = async (payload: any, user: string) => {
     const superAdmin = await UserModel.findById(user);
@@ -56,7 +59,8 @@ export const dailySubscriptionCheck = async () => {
 
 const getAllSalon = async (query: any) => {
 
-    const queryBuilder = new QueryBuilder(SalonModel.find().populate("admin", "name email phoneNumber"), query);
+    const { lat1, lon1, ...rest } = query;
+    const queryBuilder = new QueryBuilder(SalonModel.find().populate("admin", "name email phoneNumber"), rest);
     const result = await queryBuilder
         .search(['businessName', 'service', 'city', 'activeStatus'])
         .filter()
@@ -79,45 +83,23 @@ const getAllSalon = async (query: any) => {
     const injectIsRewardAvailable = await Promise.all(
         allData.map(async (salon) => {
             const reward = await RewardSalonModel.findOne({ salonId: salon._id });
-            return { ...salon, isRewardAvailable: !!reward }
+
+            let distance = null;
+            if (lat1 && lon1) {
+                const response = await axios.get(
+                    `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${lat1},${lon1}&destinations=${salon.lat},${salon.lon}&key=${envVar.GOOGLE_MAP_KEY}`
+                );
+
+                distance = response.data.rows[0].elements[0].distance.text;
+            }
+
+            return { ...salon, isRewardAvailable: !!reward, distance }
         })
     )
 
     return { allData: injectIsRewardAvailable, meta };
 
 };
-
-const getSingleSalon = async (id: string, userId: string) => {
-    const viwerInfo = await UserModel.findById(userId);
-    if (!viwerInfo) throw new AppError(httpStatus.NOT_FOUND, "User not found");
-
-    // 1️⃣ Find the salon and populate admin info
-    const salon = await SalonModel.findById(id).populate("admin", "name email phoneNumber");
-    if (!salon) {
-        throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
-    }
-
-    // 2️⃣ Find all visitors for this salon
-    const visitors = await ViewReward.find({ salonId: salon._id }).populate<{ customer: { isOnline: boolean } }>(
-        "userId",
-        "isOnline "
-    )
-        .lean();
-
-    // 3️⃣ Calculate total points issued
-    await visitSalon(salon._id.toString(), viwerInfo._id.toString());
-
-    // 4️⃣ Calculate total online customers
-    const totalOnline = visitors.filter(visitor => visitor.userId?.isOnline).length;
-
-    // 5️⃣ Return summary only
-    return {
-        ...salon.toObject(),
-        totalOnline,
-    };
-};
-
-
 
 const updateSalon = async (id: string, payload: any, user: string) => {
     const owner = await UserModel.findById(user);
@@ -162,10 +144,79 @@ const deleteSalon = async (id: string, user: string) => {
     return null;
 };
 
+const getSingleSalon = async (id: string, userId: string, lat1: string, lon1: string) => {
+    const viwerInfo = await UserModel.findById(userId);
+    if (!viwerInfo) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+
+    // 1️⃣ Find the salon and populate admin info
+    const salon = await SalonModel.findById(id).populate("admin", "name email phoneNumber");
+    if (!salon) {
+        throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
+    }
+
+    // 2️⃣ Find all visitors for this salon
+    const visitors = await ViewReward.find({ salonId: salon._id }).populate<{ customer: { isOnline: boolean } }>(
+        "userId",
+        "isOnline "
+    )
+        .lean();
+
+    let distance = 0
+    if (lat1 && lon1) {
+        distance = getDistance(lat1, lon1, salon.lat, salon.lon);
+    }
+
+
+    // 4️⃣ Calculate total online customers
+    const totalOnline = visitors.filter(visitor => visitor.userId?.isOnline).length;
+
+    // 5️⃣ Return summary only
+    return {
+        ...salon.toObject(),
+        totalOnline,
+        distance
+    };
+};
+
+const visitConfirm = async (id: string, user: string, lat1: string, lon1: string) => {
+    const viwerInfo = await UserModel.findById(user);
+    if (!viwerInfo) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+
+    // 1️⃣ Find the salon and populate admin info
+    const salon = await SalonModel.findById(id).populate("admin", "name email phoneNumber");
+    if (!salon) {
+        throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
+    }
+
+    // 2️⃣ Find all visitors for this salon
+    const visitors = await ViewReward.find({ salonId: salon._id }).populate<{ customer: { isOnline: boolean } }>(
+        "userId",
+        "isOnline "
+    )
+        .lean();
+
+    let distance = 0
+    if (lat1 && lon1) {
+        distance = getDistance(lat1, lon1, salon.lat, salon.lon);
+    }
+
+    if (distance * 1000 > 50) {
+        throw new AppError(httpStatus.BAD_REQUEST, "You are too far from the salon. You must be within 50 meters.")
+    }
+
+    // 3️⃣ Calculate total points issued
+    await visitSalon(salon._id.toString(), viwerInfo._id.toString());
+
+    // 5️⃣ Return summary only
+    return { message: "Visit confirmed successfully" }
+};
+
+
 export const salonService = {
     createSalon,
     getAllSalon,
     getSingleSalon,
     updateSalon,
     deleteSalon,
+    visitConfirm
 };

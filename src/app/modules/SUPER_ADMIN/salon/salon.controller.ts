@@ -28,7 +28,8 @@ const getAllSalon = catchAsync(async (req: Request, res: Response) => {
 
 const getSingleSalon = catchAsync(async (req: Request, res: Response) => {
     const user = req.user.userId;
-    const result = await salonService.getSingleSalon(req.params.id as string, user);
+    const { lat1, lon1 } = req.query;
+    const result = await salonService.getSingleSalon(req.params.id as string, user, lat1 as string, lon1 as string);
 
     res.status(200).json({
         success: true,
@@ -61,10 +62,22 @@ const deleteSalon = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+
+const visitConfirm = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user.userId;
+    const { lat1, lon1 } = req.query;
+    const result = await salonService.visitConfirm(req.params.id as string, user, lat1 as string, lon1 as string);
+
+    res.status(200).json({
+        success: true,
+        message: result.message
+    });
+});
 export const salonController = {
     createSalon,
     getAllSalon,
     getSingleSalon,
     updateSalon,
     deleteSalon,
+    visitConfirm
 };

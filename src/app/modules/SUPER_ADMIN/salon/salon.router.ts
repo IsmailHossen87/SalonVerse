@@ -19,5 +19,6 @@ router.patch("/:id", checkAuth(USER_ROLE.OWNER),
     parseFormDataMiddleware,
     catchAsync(salonController.updateSalon));
 router.delete("/:id", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.deleteSalon));
+router.post("/visit-confirm/:id", checkAuth(USER_ROLE.USER), catchAsync(salonController.visitConfirm))
 
 export const SalonRoutes = router;

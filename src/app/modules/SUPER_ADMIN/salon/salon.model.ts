@@ -31,6 +31,8 @@ const salonSchema = new Schema<ISalon>(
         service: { type: String, },
         image: { type: String },
         location: { type: String },
+        lat: { type: String },
+        lon: { type: String },
         description: { type: String },
         openingTime: { type: [openingTimeSchema] },
     },
