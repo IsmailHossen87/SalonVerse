@@ -15,6 +15,8 @@ import { Rule } from "../Setting/rule/rule.model";
 import { firebaseNotificationBuilder } from "../../shared/sendNotification";
 import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../notification/notification.interface";
 
+import { CreateUserToken } from "../../utils/userToken";
+
 
 // ✅ Step 1: OTP পাঠাও
 const sendRegistrationOTP = async (phoneNumber: string) => {
@@ -104,11 +106,20 @@ export const createUser = async (payload: any) => {
         //     otp,
         // );
 
-        /* ================= ONE ACCOUNT PER PHONE ================= */
+        /* ================= IF USER EXISTS → LOGIN ================= */
 
         const existingUser = await UserModel.findOne({ phoneNumber });
+
         if (existingUser) {
-            throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
+            await session.abortTransaction();
+            session.endSession();
+
+            const token = await CreateUserToken(existingUser);
+            return {
+                isNewUser: false,
+                accessToken: token.accessToken,
+                refreshToken: token.refreshToken,
+            };
         }
 
         /* ================= CHECK INVITER ================= */
@@ -182,7 +193,13 @@ export const createUser = async (payload: any) => {
         await session.commitTransaction();
         session.endSession();
 
-        return user[0];
+        /* ================= GENERATE TOKENS ================= */
+        const token = await CreateUserToken(user[0]);
+        return {
+            isNewUser: true,
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken,
+        };
     } catch (error) {
         await session.abortTransaction();
         session.endSession();

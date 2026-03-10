@@ -35,6 +35,7 @@ const salonSchema = new Schema<ISalon>(
         lon: { type: String },
         description: { type: String },
         openingTime: { type: [openingTimeSchema] },
+
     },
     {
         timestamps: true,

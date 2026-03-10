@@ -115,7 +115,7 @@ const loginCredential = async (data: { phoneNumber: string; otp: string }) => {
 };
 
 const loginSuperAdmin = async (data: IUser) => {
-    const result = await UserModel.findOne({ email: data.email })
+    const result = await UserModel.findOne({ email: data.email, role: data.role }).select("name email role image verified password")
     if (!result) {
         throw new AppError(httpStatus.NOT_FOUND, "User not found")
     }
@@ -130,7 +130,7 @@ const loginSuperAdmin = async (data: IUser) => {
     if (result?.fcmToken) {
         await firebaseNotificationBuilder({
             user: result,
-            title: "Welcome Backe",
+            title: "Welcome Back",
             body: "You've successfully logged in",
             notificationEvent: INOTIFICATION_EVENT.LOGIN,
             notificationType: INOTIFICATION_TYPE.NOTIFICATION,
@@ -139,8 +139,14 @@ const loginSuperAdmin = async (data: IUser) => {
         })
     }
 
-
     return {
+        user: {
+            _id: result._id,
+            name: result.name,
+            email: result.email,
+            role: result.role,
+            image: result.image,
+        },
         accessToken: token.accessToken,
         refreshToken: token.refreshToken
     }

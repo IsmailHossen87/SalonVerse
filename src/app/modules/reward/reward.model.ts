@@ -32,6 +32,8 @@ const viewRewardSchema = new Schema({
     timeZoneBonusCoins: { type: Number, default: 0 },
     totalVisitBonusCoins: { type: Number, default: 0 },
     everyShareBonusCoins: { type: Number, default: 0 }
+}, {
+    timestamps: true
 });
 
 viewRewardSchema.index({ userId: 1, salonId: 1, createdAt: 1 });

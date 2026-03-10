@@ -26,7 +26,7 @@ const loginSuperAdmin = catchAsync(async (req: Request, res: Response, next: Nex
     res.status(200).json({
         success: true,
         message: "User Login successfully",
-        data: result
+        data: { ...result }
     })
 })
 // 🔥🔥🔥🔥 Google Login

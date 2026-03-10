@@ -2,6 +2,8 @@
 import { Request, Response, NextFunction } from "express";
 import { salonService } from "./salon.service";
 import catchAsync from "../../../utils/catchAsync";
+import AppError from "../../../errorHalper.ts/AppError";
+import httpStatus from "http-status-codes";
 
 const createSalon = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user.userId;
@@ -66,6 +68,9 @@ const deleteSalon = catchAsync(async (req: Request, res: Response) => {
 const visitConfirm = catchAsync(async (req: Request, res: Response) => {
     const user = req.user.userId;
     const { lat1, lon1 } = req.query;
+    if (!lat1 || !lon1) {
+        throw new AppError(httpStatus.BAD_REQUEST, "Latitude and longitude are required");
+    }
     const result = await salonService.visitConfirm(req.params.id as string, user, lat1 as string, lon1 as string);
 
     res.status(200).json({
