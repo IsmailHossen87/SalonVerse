@@ -5,7 +5,7 @@ import { PointIssuedHistory, Reward, ViewReward } from "../../reward/reward.mode
 import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { UserModel } from "../../user/user.model";
 import httpStatus from "http-status-codes";
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
 import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
 
@@ -92,10 +92,12 @@ const approvedReward = async (userId: string, reqUser: JwtPayload) => {
 
     if (userInfo.role !== USER_ROLE.OWNER && userInfo.role !== USER_ROLE.SUPER_ADMIN) throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
 
-    const reward = await Reward.findById(userId);
+    const user = new mongoose.Types.ObjectId(userId)
+    const reward = await Reward.findOne({ userId: user });
     if (!reward) throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
 
     reward.status = IStatus.APPROVED;
+
     const rewardOwnerUser = await UserModel.findById(reward.userId);
     if (!rewardOwnerUser) throw new AppError(httpStatus.NOT_FOUND, "Reward owner not found");
     if (rewardOwnerUser.fcmToken) {

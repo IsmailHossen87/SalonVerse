@@ -50,6 +50,7 @@ const getAllVisitRecord = async (query: any) => {
     const resultData = data?.map((item: any) => {
         return {
             user: item.userId.name || 'N/A',
+            userId: item.userId._id,
             lastView: item.lastVisitAt,
             totalVisit: item.totalVisit,
             salonName: item.salonId.businessName,

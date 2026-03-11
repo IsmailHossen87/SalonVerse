@@ -155,7 +155,7 @@ const getSingleSalon = async (id: string, userId: string, lat1: string, lon1: st
     }
 
     // 2️⃣ Find all visitors for this salon
-    const visitors = await ViewReward.find({ salonId: salon._id }).populate<{ customer: { isOnline: boolean } }>(
+    const visitors: any = await ViewReward.find({ salonId: salon._id }).populate(
         "userId",
         "isOnline "
     )
@@ -168,7 +168,8 @@ const getSingleSalon = async (id: string, userId: string, lat1: string, lon1: st
 
 
     // 4️⃣ Calculate total online customers
-    const totalOnline = visitors.filter(visitor => visitor.userId?.isOnline).length;
+
+    const totalOnline = visitors.filter((visitor: any) => visitor.userId?.isOnline).length;
 
     // 5️⃣ Return summary only
     return {

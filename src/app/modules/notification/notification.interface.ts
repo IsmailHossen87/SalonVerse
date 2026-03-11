@@ -15,8 +15,6 @@ export enum INOTIFICATION_TYPE {
     MESSAGE = 'MESSAGE',
 }
 export enum IREFERENCE_TYPE {
-    CAR = 'CAR',
-    ITEM = 'ITEM',
     USER = 'USER',
 }
 // notification.interface.ts

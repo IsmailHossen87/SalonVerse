@@ -9,6 +9,7 @@ import { VisitRoutes } from "../modules/ADMIN/visit/visit.router";
 import { CustomerRoutes } from "../modules/ADMIN/customer/customer.router";
 import { DashboardRouter } from "../modules/ADMIN/dashboard/dashboard.router";
 import { RewardRouter } from "../modules/reward/reward.router";
+import { notificationRouter } from "../modules/notification/notification.router";
 
 const router = Router();
 
@@ -53,6 +54,10 @@ const apiRoutes = [
         path: "/reward",
         router: RewardRouter
     },
+    {
+        path: "/notification",
+        router: notificationRouter
+    }
 ]
 
 

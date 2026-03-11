@@ -1,14 +1,14 @@
-/* eslint-disable no-console */
-import { Server } from "http"
 import mongoose from "mongoose"
 import app from "./app"
 import { envVar } from "./app/config/env"
 import { logger } from "./app/shared/looger"
-import { config } from "process"
 import { connectRedis } from "./app/config/redis.config"
 import { seedSuperAdmin } from "./app/utils/seed.SuperAdmin"
+import { socketHelper } from "./app/helpers/socketHelper"
+import { Server } from "socket.io"
 
-let server: Server
+
+let server: any
 
 // servers connected
 const startServer = async () => {
@@ -22,8 +22,19 @@ const startServer = async () => {
          logger.info("🔥🔥Server is Running")
       })
 
+      // 🔥 Initialize Socket.io
+      //socket
+      const io = new Server(server, {
+         pingTimeout: 60000,
+         cors: {
+            origin: '*',
+         },
+      });
+      socketHelper.socket(io);
+      //@ts-ignore
+      global.io = io;
    } catch (error) {
-      console.log("Error", error)
+      console.log(error);
    }
 }
 

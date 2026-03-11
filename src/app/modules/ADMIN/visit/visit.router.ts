@@ -10,9 +10,10 @@ router.route("/")
     .get(checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER, USER_ROLE.USER), VisitController.getAllVisitRecord)
 
 router.route("/:id")
-    .post(checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER), VisitController.confirmVisit)
+    .patch(checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER), VisitController.confirmVisit)
 
 
 
 
 export const VisitRoutes = router;
+

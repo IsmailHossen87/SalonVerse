@@ -1,6 +1,7 @@
 import AppError from "../../../errorHalper.ts/AppError";
+import { saveNotification, socketHelper } from "../../../helpers/socketHelper";
 import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
-import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE, IREFERENCE_TYPE } from "../../notification/notification.interface";
 import { PointIssuedHistory, ViewReward } from "../../reward/reward.model";
 import { Rule } from "../../Setting/rule/rule.model";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
@@ -112,20 +113,34 @@ export const visitSalon = async (salonId: string, userId: string) => {
         },
         { upsert: true, new: true }
     );
-    if (user.fcmToken) {
-        await firebaseNotificationBuilder({
-            user: user,
-            title: "You've successfully visited a salon",
-            body: `You've sucessfully visited a salon and received ${coinsToAdd} coins`,
-            notificationEvent: INOTIFICATION_EVENT.VISIT,
-            notificationType: INOTIFICATION_TYPE.NOTIFICATION,
-            referenceId: user._id,
-            referenceType: "User"
-        })
-    }
+    // if (user.fcmToken) {
+    //     await firebaseNotificationBuilder({
+    //         user: user,
+    //         title: "You've successfully visited a salon",
+    //         body: `You've sucessfully visited a salon and received ${coinsToAdd} coins`,
+    //         notificationEvent: INOTIFICATION_EVENT.VISIT,
+    //         notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+    //         referenceId: user._id,
+    //         referenceType: "User"
+    //     })
+    // }
+    socketHelper.emit("notification", {
+        receiver: user._id.toString(),
+        title: "Visit Reward pending",
+        message: `You've successfully visited a salon and pending ${coinsToAdd} coins`,
+        type: "VISIT_REWARD",
+    });
+    await saveNotification({
+        receiverId: user._id,
+        title: "Visit Reward pending",
+        body: `You've successfully visited a salon and pending ${coinsToAdd} coins`,
+        notificationEvent: INOTIFICATION_EVENT.VISIT,
+        notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+        read: false,
+    });
 
     return {
-        message: `Visit recorded! ${coinsToAdd} coins added`,
+        message: `Visit recorded! ${coinsToAdd} coins pending`,
         coinsBreakdown: {
             baseCoins: rules.everyVisitCoins,
             timezoneBonus: isInTimeZone ? rules.timeZoneGetCoin : 0,

@@ -10,6 +10,7 @@ import { PointIssuedHistory, PurchaseReward, ViewReward } from "../../reward/rew
 import mongoose, { Types } from "mongoose";
 import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
 import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
+import { saveNotification, socketHelper } from "../../../helpers/socketHelper";
 // reward.service.ts
 const createReward = async (payload: any, userId: string) => {
     const user = await UserModel.findById(userId);
@@ -156,12 +157,11 @@ const updateSalonReward = async (id: string, payload: any) => {
 
 const claimReward = async (id: string, userId: string) => {
     const reward = await RewardSalonModel.findById(id);
+    if (!reward) throw new AppError(httpStatus.NOT_FOUND, "Reward not found")
+
     const visitorUser = await UserModel.findById(userId)
     if (!visitorUser) {
         throw new AppError(httpStatus.NOT_FOUND, "User not found");
-    }
-    if (!reward) {
-        throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
     }
 
     await PurchaseReward.create({
@@ -171,9 +171,14 @@ const claimReward = async (id: string, userId: string) => {
         pointCost: reward.rewardPoints
     });
 
+    if (Number(reward?.rewardPoints) > Number(visitorUser?.coins)) {
+        throw new AppError(httpStatus.BAD_REQUEST, "You don't have enough coins to claim this reward");
+    }
+
     await UserModel.findByIdAndUpdate(visitorUser._id, {
         $inc: { coins: -reward.rewardPoints }
     });
+
     if (visitorUser.fcmToken) {
         await firebaseNotificationBuilder({
             user: visitorUser,
@@ -306,6 +311,23 @@ const approveRedemption = async (id: string, userId: string) => {
             $inc: { coins: -rewardInfo.rewardPoints }
         });
     }
+
+    const user = await UserModel.findById(reward.userId);
+    if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    socketHelper.emit("notification", {
+        receiver: user._id.toString(),
+        title: "Approved Reward",
+        message: `You've successfully claimed a reward ${rewardInfo.rewardPoints} coins`,
+        type: "VISIT_REWARD",
+    });
+    await saveNotification({
+        receiverId: user._id,
+        title: "Approved Reward",
+        body: `You've successfully claimed a reward ${rewardInfo.rewardPoints} coins`,
+        notificationEvent: INOTIFICATION_EVENT.CLAIM_REWARD,
+        notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+        read: false,
+    });
 
     return `Reward ${status} successfully`;
 }

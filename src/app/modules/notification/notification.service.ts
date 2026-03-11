@@ -1,41 +1,56 @@
-import { saveNotification } from "../../shared/sendNotification"
-import { NOTIFICATION_TYPE } from "./notification.interface";
+import AppError from "../../errorHalper.ts/AppError";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import { NotificationModel } from "./notification.model";
+import httpStatus from "http-status-codes";
 
 // notification.service.ts
-const sendNotification = async (payload: any) => {
+const sendNotification = async (query: any) => {
 
 }
-// NOTIFICATION 🔔🔔🔔
-// sendReaujableNotification({
-//     fcmToken: carOwner?.fcmToken,
-//     title: "Car Status Changed",
-//     body: "Your car status has been changed to",
-//     type: NOTIFICATION_TYPE.CAR_APPROVED,
-//     carId: carId,
-//     senderId: userId,
-//     receiverId: carOwner?.id,
-//     image: CarInfo?.images[0],
-// })
 
+const getAllNotification = async (query: any, userId: string) => {
 
+    const queryBuilder = new QueryBuilder(NotificationModel.find({ receiverId: userId, isDeleted: false }), query)
+        .sort()
+        .paginate()
+        .fields()
 
+    const [data, meta] = await Promise.all([
+        queryBuilder.build(), queryBuilder.getMeta()
+    ]);
 
-// const valueForNotification = {
-//     title: "Car Status Changed",
-//     body: "Your car status has been changed to",
-//     type: NOTIFICATION_TYPE.CAR_APPROVED,
-//     notificationType: "NOTIFICATION",
-//     status: "SUCCESS",
-//     senderId: "",
-//     receiverId: "",
-// }
-// saveNotification(valueForNotification)
+    if (data.length === 0) {
+        throw new AppError(httpStatus.NOT_FOUND, "Notification not found")
+    }
 
-
-const getAllNotification = async () => {
-    return
+    return { data, meta }
 }
+
+const getSingleNotification = async (id: string) => {
+    const notification = await NotificationModel.findById(id)
+    if (!notification) {
+        throw new AppError(httpStatus.NOT_FOUND, "Notification not found")
+    }
+
+    notification.read = true;
+    await notification.save();
+    return notification
+}
+
+const deleteNotification = async (id: string) => {
+    const notification = await NotificationModel.findById(id)
+    if (!notification) {
+        throw new AppError(httpStatus.NOT_FOUND, "Notification not found")
+    }
+    notification.isDeleted = true;
+    await notification.save();
+    return notification
+}
+
+
 export const NotificationService = {
     sendNotification,
-    getAllNotification
+    getAllNotification,
+    getSingleNotification,
+    deleteNotification
 }

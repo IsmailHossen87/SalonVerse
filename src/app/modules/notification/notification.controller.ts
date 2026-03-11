@@ -21,17 +21,39 @@ import { NotificationService } from "./notification.service"
 
 const getAllNotification = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
-    // const result = await NotificationService.getAllNotification(query)
+    const result = await NotificationService.getAllNotification(query, req.user.userId as string)
 
     res.status(200).json({
         success: true,
         message: "Notification retrived successfully",
-        // data: result
+        meta: result.meta,
+        data: result.data
     })
 })
 
+const getSingleNotification = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const result = await NotificationService.getSingleNotification(req.params.id as string)
+
+    res.status(200).json({
+        success: true,
+        message: "Notification retrived successfully",
+        data: result
+    })
+})
+
+const deleteNotification = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const result = await NotificationService.deleteNotification(req.params.id as string)
+
+    res.status(200).json({
+        success: true,
+        message: "Notification deleted successfully",
+        data: result
+    })
+})
 
 export const NotificationController = {
     // sendNotification,
-    getAllNotification
+    getAllNotification,
+    getSingleNotification,
+    deleteNotification
 }
