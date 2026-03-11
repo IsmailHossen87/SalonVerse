@@ -6,7 +6,7 @@ import { salonRewardService } from "./salonReward.service";
 
 const createSalonReward = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     if (req.files && "image" in req.files && req.files.image) {
-        req.body.rewardImage = `image/${req.files.image[0].filename}`;
+        req.body.rewardImage = `/image/${req.files.image[0].filename}`;
     }
 
     const user = req.user.userId;
@@ -41,7 +41,7 @@ const getSingleSalonReward = catchAsync(async (req: Request, res: Response, next
 
 const updateSalonReward = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     if (req.files && "image" in req.files && req.files.image) {
-        req.body.rewardImage = `image/${req.files.image[0].filename}`;
+        req.body.rewardImage = `/image/${req.files.image[0].filename}`;
     }
     const result = await salonRewardService.updateSalonReward(req.params.id as string, req.body);
     res.status(200).json({

@@ -41,7 +41,7 @@ const getSingleSalon = catchAsync(async (req: Request, res: Response) => {
 
 const updateSalon = catchAsync(async (req: Request, res: Response) => {
     if (req.files && "image" in req.files && req.files.image) {
-        req.body.image = `image/${req.files.image[0].filename}`;
+        req.body.image = `/image/${req.files.image[0].filename}`;
     }
     const user = req.user.userId;
 

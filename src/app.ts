@@ -22,6 +22,9 @@ app.use(cors())
 app.use(express.json())
 app.use("/api/v1", router);
 app.use('/uploads', express.static('uploads'));
+app.use('/image', express.static('uploads/image'));
+app.use('/media', express.static('uploads/media'));
+app.use('/doc', express.static('uploads/doc'));
 
 app.use(async (req, res, next) => {
     const userId = req.user?.userId;

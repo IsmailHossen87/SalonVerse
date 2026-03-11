@@ -56,7 +56,6 @@ export const dailySubscriptionCheck = async () => {
     });
 };
 
-
 const getAllSalon = async (query: any) => {
 
     const { lat1, lon1, ...rest } = query;
