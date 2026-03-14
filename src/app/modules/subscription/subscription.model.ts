@@ -59,7 +59,7 @@ subscriptionSchema.pre('save', async function (next) {
      if (subscription.packageEventCountLimit < subscription.usedEventCount) {
           throw new Error('Used event count cannot be greater than package event count limit');
      }
-     next();
+     // next();
 });
 
 export const Subscription = model<ISubscription, SubscriptionModel>('Subscription', subscriptionSchema);

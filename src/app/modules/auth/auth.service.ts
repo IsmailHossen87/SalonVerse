@@ -129,17 +129,7 @@ const loginSuperAdmin = async (data: IUser) => {
     }
     const token = await CreateUserToken(result)
     // 🔔🔔🪧🔔🔔
-    if (result?.fcmToken) {
-        await firebaseNotificationBuilder({
-            user: result,
-            title: "Welcome Back",
-            body: "You've successfully logged in",
-            notificationEvent: INOTIFICATION_EVENT.LOGIN,
-            notificationType: INOTIFICATION_TYPE.NOTIFICATION,
-            referenceId: result._id,
-            referenceType: "User"
-        })
-    }
+
 
     return {
         user: {

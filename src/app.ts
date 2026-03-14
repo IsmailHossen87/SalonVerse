@@ -21,6 +21,8 @@ app.use(cors({
         "http://10.10.7.37:3000",
         "http://localhost:3002",
         "https://ismail4000.binarybards.online",
+        "https://zena-admin-dashboard.vercel.app",
+        "https://zena-user-dashboard.vercel.app"
     ],
     credentials: true,
 }));

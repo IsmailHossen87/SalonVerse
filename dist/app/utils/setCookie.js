@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.setAuthCookie = void 0;
+const env_1 = require("../config/env");
+const setAuthCookie = (res, tokenInfo) => {
+    if (tokenInfo.refreshToken) {
+        res.cookie("refreshToken", tokenInfo.refreshToken, {
+            httpOnly: true,
+            secure: env_1.envVar.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+    }
+};
+exports.setAuthCookie = setAuthCookie;

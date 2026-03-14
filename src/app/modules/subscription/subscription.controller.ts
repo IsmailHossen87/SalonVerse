@@ -1,15 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import { SubscriptionServices } from './subscription.service';
-import catchAsync from '../../../shared/catchAsync';
-import sendResponse from '../../../shared/sendResponse';
+
 import { StatusCodes } from 'http-status-codes';
-import { IJwtData } from '../../../types/auth';
+import catchAsync from '../../utils/catchAsync';
+import { sendResponse } from '../../utils/sendResponse';
+
 
 // create subscription
 const createSubscription = catchAsync(async (req: Request, res: Response) => {
      const result = await SubscriptionServices.createSubscriptionIntoDB({
           ...req.body,
-          user: (req.user as IJwtData)?.id,
+          user: (req.user)?.id,
      });
 
      sendResponse(res, {
