@@ -15,7 +15,15 @@ app.post(
     express.raw({ type: 'application/json' }),
     webhookHandler
 );
-
+app.use(cors({
+    origin: [
+        "http://10.10.7.37:3000",
+        "http://10.10.7.37:3000",
+        "http://localhost:3002",
+        "https://ismail4000.binarybards.online",
+    ],
+    credentials: true,
+}));
 
 
 app.use(cors())

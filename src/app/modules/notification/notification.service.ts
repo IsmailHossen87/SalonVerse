@@ -19,10 +19,6 @@ const getAllNotification = async (query: any, userId: string) => {
         queryBuilder.build(), queryBuilder.getMeta()
     ]);
 
-    if (data.length === 0) {
-        throw new AppError(httpStatus.NOT_FOUND, "Notification not found")
-    }
-
     return { data, meta }
 }
 
@@ -48,9 +44,18 @@ const deleteNotification = async (id: string) => {
 }
 
 
+const getNotificationCount = async (userId: string) => {
+    const notification = await NotificationModel.countDocuments({ receiverId: userId, isDeleted: false, read: false })
+    if (!notification) {
+        throw new AppError(httpStatus.NOT_FOUND, "Notification not found")
+    }
+    return notification
+}
+
 export const NotificationService = {
     sendNotification,
     getAllNotification,
     getSingleNotification,
-    deleteNotification
+    deleteNotification,
+    getNotificationCount
 }

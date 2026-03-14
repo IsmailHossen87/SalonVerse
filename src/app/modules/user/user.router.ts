@@ -9,7 +9,6 @@ import { parseFormDataMiddleware } from "../../middleware/parseFromData";
 
 // user.router.ts
 const router = Router();
-const allUser = [USER_ROLE.SUPER_ADMIN, USER_ROLE.USER];
 
 // ✅ নতুন route: OTP পাঠানো
 router.post("/send-otp", userController.sendOTP);
@@ -18,7 +17,7 @@ router.get("/coins", checkAuth(USER_ROLE.USER), userController.getUserCoins);
 router
     .route("/")
     .get(checkAuth(USER_ROLE.SUPER_ADMIN), userController.getAllUser)
-    .patch(checkAuth(...allUser), fileUploadHandler(), parseFormDataMiddleware, userController.updateUser)
+    .patch(checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), fileUploadHandler(), parseFormDataMiddleware, userController.updateUser)
     .post(fileUploadHandler(), parseFormDataMiddleware, userController.createUser);
 
 router.route("/details").get(checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), userController.userDetails);

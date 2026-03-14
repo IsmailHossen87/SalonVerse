@@ -7,7 +7,8 @@ import AppError from "../../../errorHalper.ts/AppError";
 import httpStatus from "http-status-codes";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
-import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE, IREFERENCE_TYPE } from "../../notification/notification.interface";
+import { saveNotification, socketHelper } from "../../../helpers/socketHelper";
 
 // visit.service.ts
 const getAllVisitRecord = async (query: any) => {
@@ -51,6 +52,7 @@ const getAllVisitRecord = async (query: any) => {
         return {
             user: item.userId.name || 'N/A',
             userId: item.userId._id,
+            rewardId: item._id,
             lastView: item.lastVisitAt,
             totalVisit: item.totalVisit,
             salonName: item.salonId.businessName,
@@ -86,25 +88,25 @@ const approveVisitCoin = async (id: string, userId: string) => {
         await rewardOwner.updateOne({ $inc: { coins: visit.pendingCoins } })
         await visit.updateOne({ pendingCoins: 0 })
 
-        await PointIssuedHistory.create({
-            userId: visit.userId,
-            salonId: visit.salonId,
-            points: visit.pendingCoins,
-        })
-
-        if (rewardOwner.fcmToken) {
-            await firebaseNotificationBuilder({
-                user: rewardOwner,
-                title: "Your visit is approved",
-                body: "Your visit is approved",
-                notificationEvent: INOTIFICATION_EVENT.VISIT,
-                notificationType: INOTIFICATION_TYPE.NOTIFICATION,
-                referenceId: rewardOwner._id,
-                referenceType: "User"
-            })
-        }
     }
     await visit.updateOne({ status })
+    // realtime notification for admin
+    socketHelper.emit("notification", {
+        receiver: rewardOwner._id,
+        title: "Reward Claimed",
+        message: `${visit.pendingCoins} claimed successfully`,
+        type: "INVITE_REWARD",
+    });
+    await saveNotification({
+        receiverId: rewardOwner._id,
+        title: "View Reward Claimed",
+        body: `${visit.pendingCoins} claimed successfully`,
+        notificationEvent: INOTIFICATION_EVENT.PURCHASE_REWARD,
+        notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+        referenceId: visit._id,
+        referenceType: IREFERENCE_TYPE.USER,
+        read: false,
+    });
     return visit
 }
 

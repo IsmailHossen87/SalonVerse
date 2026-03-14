@@ -110,8 +110,10 @@ const loginCredential = async (data: { phoneNumber: string; otp: string }) => {
     const token = await CreateUserToken(result);
     return {
         accessToken: token.accessToken,
-        refreshToken: token.refreshToken
+        refreshToken: token.refreshToken,
+        userId: result._id
     };
+
 };
 
 const loginSuperAdmin = async (data: IUser) => {

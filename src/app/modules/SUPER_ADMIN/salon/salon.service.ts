@@ -7,7 +7,7 @@ import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { generateHashCode } from "../../../utils/generate";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
 import { visitSalon } from "./visitRecord";
-import { Reward, ViewReward } from "../../reward/reward.model";
+import { PurchaseReward, Reward, ViewReward } from "../../reward/reward.model";
 import { RewardSalonModel } from "../../ADMIN/salonReward/salonReward.model";
 import axios from "axios";
 import { envVar } from "../../../config/env";
@@ -59,6 +59,7 @@ export const dailySubscriptionCheck = async () => {
 const getAllSalon = async (query: any) => {
 
     const { lat1, lon1, ...rest } = query;
+
     const queryBuilder = new QueryBuilder(SalonModel.find().populate("admin", "name email phoneNumber"), rest);
     const result = await queryBuilder
         .search(['businessName', 'service', 'city', 'activeStatus'])
@@ -83,13 +84,18 @@ const getAllSalon = async (query: any) => {
         allData.map(async (salon) => {
             const reward = await RewardSalonModel.findOne({ salonId: salon._id });
 
+
             let distance = null;
             if (lat1 && lon1) {
                 const response = await axios.get(
-                    `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${lat1},${lon1}&destinations=${salon.lat},${salon.lon}&key=${envVar.GOOGLE_MAP_KEY}`
+                    `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${Number(lat1)},${Number(lon1)}&destinations=${Number(salon.lat)},${Number(salon.lon)}&key=${envVar.GOOGLE_MAP_KEY}`
                 );
 
-                distance = response.data.rows[0].elements[0].distance.text;
+                const element = response?.data?.rows?.[0]?.elements?.[0];
+
+                if (element?.status === "OK") {
+                    distance = element.distance.text;
+                }
             }
 
             return { ...salon, isRewardAvailable: !!reward, distance }
@@ -100,7 +106,7 @@ const getAllSalon = async (query: any) => {
 
 };
 
-const updateSalon = async (id: string, payload: any, user: string) => {
+const updateSalon = async (payload: any, user: string) => {
     const owner = await UserModel.findById(user);
     if (!owner) {
         throw new AppError(httpStatus.NOT_FOUND, "Owner not found");
@@ -109,7 +115,7 @@ const updateSalon = async (id: string, payload: any, user: string) => {
     if (owner.role !== USER_ROLE.OWNER) {
         throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
-    const salonOwner = await SalonModel.findOne({ admin: owner._id, _id: id });
+    const salonOwner = await SalonModel.findOne({ admin: owner._id });
     if (!salonOwner) {
         throw new AppError(httpStatus.NOT_FOUND, `Salon not found for this ${owner.name}`);
     }
@@ -177,6 +183,24 @@ const getSingleSalon = async (id: string, userId: string, lat1: string, lon1: st
         distance
     };
 };
+const getSalonSetting = async (user: string) => {
+    const owner = await UserModel.findById(user);
+    console.log("OWNER", owner)
+    if (!owner) {
+        throw new AppError(httpStatus.NOT_FOUND, "Owner not found");
+    }
+
+    if (owner.role !== USER_ROLE.OWNER) {
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+    }
+    const salonOwner = await SalonModel.findOne({ admin: owner._id });
+    console.log("SALONWONER", salonOwner)
+    if (!salonOwner) {
+        throw new AppError(httpStatus.NOT_FOUND, `Salon not found for this ${owner.name}`);
+    }
+
+    return salonOwner;
+};
 
 const visitConfirm = async (id: string, user: string, lat1: string, lon1: string) => {
     const viwerInfo = await UserModel.findById(user);
@@ -186,6 +210,10 @@ const visitConfirm = async (id: string, user: string, lat1: string, lon1: string
     const salon = await SalonModel.findById(id).populate("admin", "name email phoneNumber");
     if (!salon) {
         throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
+    }
+    const checkTodayVisitSalon = await PurchaseReward.findOne({ salonId: salon._id, userId: user, createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } });
+    if (checkTodayVisitSalon) {
+        throw new AppError(httpStatus.BAD_REQUEST, "You have already visited this salon today");
     }
 
     // 2️⃣ Find all visitors for this salon
@@ -218,5 +246,6 @@ export const salonService = {
     getSingleSalon,
     updateSalon,
     deleteSalon,
-    visitConfirm
+    visitConfirm,
+    getSalonSetting
 };

@@ -11,13 +11,17 @@ import { parseFormDataMiddleware } from "../../../middleware/parseFromData";
 const router = express.Router();
 
 router.post("/", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.createSalon));
-router.get("/", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER, USER_ROLE.USER), catchAsync(salonController.getAllSalon));
-router.get("/:id", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), catchAsync(salonController.getSingleSalon));
-
-router.patch("/:id", checkAuth(USER_ROLE.OWNER),
+router.patch("/setting", checkAuth(USER_ROLE.OWNER),
     fileUploadHandler(),
     parseFormDataMiddleware,
     catchAsync(salonController.updateSalon));
+router.get("/setting", checkAuth(USER_ROLE.OWNER), catchAsync(salonController.getSalonSetting));
+
+router.get("/", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER, USER_ROLE.USER), catchAsync(salonController.getAllSalon));
+
+router.get("/:id", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), catchAsync(salonController.getSingleSalon));
+
+
 router.delete("/:id", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.deleteSalon));
 router.post("/visit-confirm/:id", checkAuth(USER_ROLE.USER), catchAsync(salonController.visitConfirm))
 

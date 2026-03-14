@@ -42,7 +42,7 @@ const activeReward = async (userId: string, type: string, query: Record<string, 
         throw new AppError(httpStatus.NOT_FOUND, "User not found");
     }
 
-    if (user.role !== USER_ROLE.USER) {
+    if (user.role !== USER_ROLE.USER && user.role !== USER_ROLE.OWNER) {
         throw new AppError(httpStatus.UNAUTHORIZED, "Only user can see their data");
     }
 
@@ -82,11 +82,59 @@ const activeReward = async (userId: string, type: string, query: Record<string, 
         }
     };
 };
+const showAllReward = async (userId: string, type: string, query: Record<string, string>) => {
+
+    const user = await UserModel.findById(userId);
+    if (!user) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    if (user.role !== USER_ROLE.USER && user.role !== USER_ROLE.OWNER) {
+        throw new AppError(httpStatus.UNAUTHORIZED, "Only user can see their data");
+    }
+
+    // Decide status based on type
+    const status = type === "active" ? IStatus.PENDING : IStatus.APPROVED;
+
+
+    const queryBuilder = PurchaseReward.find({
+        userId: user._id,
+        status
+    })
+        .populate({ path: "userId", select: "name phoneNumber coins" })
+        .populate({ path: "salonId", select: "businessName service image" })
+        .populate({ path: "rewardId", select: "rewardPoints rewardName rewardImage " }).sort({ createdAt: -1 })
+
+    const result = new QueryBuilder(queryBuilder, query).paginate().sort().search([]).filter()
+
+    const [meta, data] = await Promise.all([
+        result.getMeta(),
+        result.build()
+    ])
+
+    if (!data) {
+        throw new AppError(httpStatus.NOT_FOUND, "No data found");
+    }
+
+    const rewards = await Reward.find({
+        userId: user._id,
+        status
+    })
+    const rewardData = rewards.length > 0 ? rewards : [];
+
+    return {
+        meta, data: {
+            // purchases: Array.isArray(data) ? data : [],
+            rewards: rewardData
+        }
+    };
+};
 
 
 
 export const RewardService = {
     getActiveInviteReward,
     applyReward,
-    activeReward
+    activeReward,
+    showAllReward
 };

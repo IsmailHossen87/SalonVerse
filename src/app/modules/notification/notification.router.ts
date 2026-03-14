@@ -7,6 +7,8 @@ import { USER_ROLE } from "../user/user.interface";
 const router = Router()
 router.route("/")
     .get(checkAuth(USER_ROLE.USER, USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER), NotificationController.getAllNotification)
+router.route("/count")
+    .get(checkAuth(USER_ROLE.USER, USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER), NotificationController.getNotificationCount)
 router.route("/:id")
     .get(checkAuth(USER_ROLE.USER, USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER), NotificationController.getSingleNotification)
     .delete(checkAuth(USER_ROLE.USER, USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER), NotificationController.deleteNotification)

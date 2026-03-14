@@ -19,6 +19,6 @@ router.post("/verify-user", authController.userVerify)
 router.post("/forget-password", authController.forgetPassword)
 
 // ----------- 
-router.post("/change-password", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.SUPER_ADMIN), authController.changePassword)
+router.post("/change-password", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), authController.changePassword)
 
 export const authRouter = router

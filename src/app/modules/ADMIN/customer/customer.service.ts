@@ -93,24 +93,24 @@ const approvedReward = async (userId: string, reqUser: JwtPayload) => {
     if (userInfo.role !== USER_ROLE.OWNER && userInfo.role !== USER_ROLE.SUPER_ADMIN) throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
 
     const user = new mongoose.Types.ObjectId(userId)
-    const reward = await Reward.findOne({ userId: user });
+    const reward = await Reward.findOne({ userId: user, status: IStatus.PENDING });
     if (!reward) throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
 
     reward.status = IStatus.APPROVED;
 
     const rewardOwnerUser = await UserModel.findById(reward.userId);
     if (!rewardOwnerUser) throw new AppError(httpStatus.NOT_FOUND, "Reward owner not found");
-    if (rewardOwnerUser.fcmToken) {
-        await firebaseNotificationBuilder({
-            user: rewardOwnerUser,
-            title: "You've successfully approved a reward",
-            body: "You've successfully approved a reward",
-            notificationEvent: INOTIFICATION_EVENT.APPROVE_REWARD,
-            notificationType: INOTIFICATION_TYPE.NOTIFICATION,
-            referenceId: userInfo._id,
-            referenceType: "User"
-        })
-    }
+    // if (rewardOwnerUser.fcmToken) {
+    //     await firebaseNotificationBuilder({
+    //         user: rewardOwnerUser,
+    //         title: "You've successfully approved a reward",
+    //         body: "You've successfully approved a reward",
+    //         notificationEvent: INOTIFICATION_EVENT.APPROVE_REWARD,
+    //         notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+    //         referenceId: userInfo._id,
+    //         referenceType: "User"
+    //     })
+    // }
     await reward.save();
 
     return reward;

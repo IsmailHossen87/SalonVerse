@@ -16,6 +16,9 @@ const notificationSchema = new mongoose.Schema({
     read: { type: Boolean, default: false, },
     isDeleted: { type: Boolean, default: false, },
     status: { type: String, enum: ['success', 'rejected'], default: 'success', },
+}, {
+    timestamps: true,
+    versionKey: false
 })
 
 export const NotificationModel = mongoose.model("NotificationModel", notificationSchema)

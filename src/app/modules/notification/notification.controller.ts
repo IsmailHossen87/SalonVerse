@@ -51,9 +51,20 @@ const deleteNotification = catchAsync(async (req: Request, res: Response, next: 
     })
 })
 
+const getNotificationCount = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const result = await NotificationService.getNotificationCount(req.user.userId as string)
+
+    res.status(200).json({
+        success: true,
+        message: "Notification count retrived successfully",
+        data: result
+    })
+})
+
 export const NotificationController = {
     // sendNotification,
     getAllNotification,
     getSingleNotification,
-    deleteNotification
+    deleteNotification,
+    getNotificationCount
 }

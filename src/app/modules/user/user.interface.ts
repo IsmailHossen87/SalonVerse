@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 // user.interface.ts
 export enum USER_ROLE {
     OWNER = 'ADMIN',
@@ -25,7 +27,7 @@ export interface IAuthProvider {
 }
 
 export interface IUser {
-    _id: string;
+    _id: Types.ObjectId;
     name: string;
     email: string;
     password: string;

@@ -38,6 +38,15 @@ const getSingleSalon = catchAsync(async (req: Request, res: Response) => {
         data: result,
     });
 });
+const getSalonSetting = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user.userId;
+    const result = await salonService.getSalonSetting(user);
+
+    res.status(200).json({
+        success: true,
+        data: result,
+    });
+});
 
 const updateSalon = catchAsync(async (req: Request, res: Response) => {
     if (req.files && "image" in req.files && req.files.image) {
@@ -45,7 +54,7 @@ const updateSalon = catchAsync(async (req: Request, res: Response) => {
     }
     const user = req.user.userId;
 
-    const result = await salonService.updateSalon(req.params.id as string, req.body, user);
+    const result = await salonService.updateSalon(req.body, user);
 
     res.status(200).json({
         success: true,
@@ -84,5 +93,6 @@ export const salonController = {
     getSingleSalon,
     updateSalon,
     deleteSalon,
-    visitConfirm
+    visitConfirm,
+    getSalonSetting
 };

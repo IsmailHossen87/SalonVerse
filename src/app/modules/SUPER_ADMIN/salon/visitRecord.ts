@@ -20,6 +20,9 @@ export const visitSalon = async (salonId: string, userId: string) => {
     // 2️⃣ Check Salon
     const salon = await SalonModel.findById(salonId);
     if (!salon) throw new AppError(404, "Salon not found");
+    const admin = await UserModel.findById(salon?.admin);
+    if (!admin) throw new AppError(404, "Admin not found");
+
 
     // 3️⃣ Get Smart Rule
     const rules = await Rule.findOne({ ruleType: "smartRule" });
@@ -113,6 +116,11 @@ export const visitSalon = async (salonId: string, userId: string) => {
         },
         { upsert: true, new: true }
     );
+    await PointIssuedHistory.create({
+        userId: userId,
+        salonId: salonId,
+        points: coinsToAdd,
+    })
     // if (user.fcmToken) {
     //     await firebaseNotificationBuilder({
     //         user: user,
@@ -133,9 +141,26 @@ export const visitSalon = async (salonId: string, userId: string) => {
     await saveNotification({
         receiverId: user._id,
         title: "Visit Reward pending",
-        body: `You've successfully visited a salon and pending ${coinsToAdd} coins`,
+        body: `You've successfully visited a salon and pending ${coinsToAdd} coins for approval`,
         notificationEvent: INOTIFICATION_EVENT.VISIT,
         notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+        read: false,
+    });
+    // realtime notification for admin
+    socketHelper.emit("notification", {
+        receiver: admin._id,
+        title: "Reward Claimed",
+        message: `${user.name} claimed successfully`,
+        type: "INVITE_REWARD",
+    });
+    await saveNotification({
+        receiverId: admin._id,
+        title: "Reward Claimed",
+        body: `${user.name} visited your salon and claimed ${coinsToAdd} coins pending`,
+        notificationEvent: INOTIFICATION_EVENT.PURCHASE_REWARD,
+        notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+        referenceId: user._id,
+        referenceType: IREFERENCE_TYPE.USER,
         read: false,
     });
 

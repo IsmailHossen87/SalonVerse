@@ -6,5 +6,7 @@ import { RewardConroller } from "./reward.controller";
 const router = Router()
 // User can seee their Active Reward
 router.route("/:type")
-    .get(checkAuth(USER_ROLE.USER), RewardConroller.activeReward)
+    .get(checkAuth(USER_ROLE.USER, USER_ROLE.OWNER), RewardConroller.activeReward),
+    router.route("/:id/:type")
+        .get(checkAuth(USER_ROLE.USER, USER_ROLE.OWNER), RewardConroller.showAllReward)
 export const RewardRouter = router;

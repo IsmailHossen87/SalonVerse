@@ -9,7 +9,7 @@ import unlinkFile from "../../../shared/unLinkFile";
 import { PointIssuedHistory, PurchaseReward, ViewReward } from "../../reward/reward.model";
 import mongoose, { Types } from "mongoose";
 import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
-import { INOTIFICATION_EVENT, INOTIFICATION_TYPE } from "../../notification/notification.interface";
+import { INOTIFICATION_EVENT, INOTIFICATION_TYPE, IREFERENCE_TYPE } from "../../notification/notification.interface";
 import { saveNotification, socketHelper } from "../../../helpers/socketHelper";
 // reward.service.ts
 const createReward = async (payload: any, userId: string) => {
@@ -160,6 +160,8 @@ const claimReward = async (id: string, userId: string) => {
     if (!reward) throw new AppError(httpStatus.NOT_FOUND, "Reward not found")
 
     const visitorUser = await UserModel.findById(userId)
+    const admin = await UserModel.findOne({ _id: new mongoose.Types.ObjectId(reward.ownerId) })
+    if (!admin) throw new AppError(httpStatus.NOT_FOUND, "Admin not found")
     if (!visitorUser) {
         throw new AppError(httpStatus.NOT_FOUND, "User not found");
     }
@@ -179,17 +181,23 @@ const claimReward = async (id: string, userId: string) => {
         $inc: { coins: -reward.rewardPoints }
     });
 
-    if (visitorUser.fcmToken) {
-        await firebaseNotificationBuilder({
-            user: visitorUser,
-            title: "You've successfully claimed a reward",
-            body: "You've successfully claimed a reward",
-            notificationEvent: INOTIFICATION_EVENT.CLAIM_REWARD,
-            notificationType: INOTIFICATION_TYPE.NOTIFICATION,
-            referenceId: visitorUser._id,
-            referenceType: "User"
-        })
-    }
+    // realtime notification
+    socketHelper.emit("notification", {
+        receiver: visitorUser._id,
+        title: "Reward Claimed",
+        message: `${reward.rewardName} claimed successfully`,
+        type: "INVITE_REWARD",
+    });
+    await saveNotification({
+        receiverId: visitorUser._id,
+        title: "Reward Claimed",
+        body: `${reward.rewardName} claimed successfully`,
+        notificationEvent: INOTIFICATION_EVENT.PURCHASE_REWARD,
+        notificationType: INOTIFICATION_TYPE.NOTIFICATION,
+        referenceId: visitorUser._id,
+        referenceType: IREFERENCE_TYPE.USER,
+        read: false,
+    });
 
     return `${reward.rewardName} claimed successfully`;
 }
@@ -320,14 +328,7 @@ const approveRedemption = async (id: string, userId: string) => {
         message: `You've successfully claimed a reward ${rewardInfo.rewardPoints} coins`,
         type: "VISIT_REWARD",
     });
-    await saveNotification({
-        receiverId: user._id,
-        title: "Approved Reward",
-        body: `You've successfully claimed a reward ${rewardInfo.rewardPoints} coins`,
-        notificationEvent: INOTIFICATION_EVENT.CLAIM_REWARD,
-        notificationType: INOTIFICATION_TYPE.NOTIFICATION,
-        read: false,
-    });
+
 
     return `Reward ${status} successfully`;
 }
@@ -377,13 +378,17 @@ const getViewHistory = async (id: string, userId: string) => {
     })
         .populate({ path: "userId", select: "phoneNumber" })
         .populate({ path: "salonId", select: "businessName location service" });
+    let salonData = null
 
     if (reward.length === 0) {
-        throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
+        const salon = await SalonModel.findById(id).select("businessName location service");
+        if (!salon) throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
+        salonData = salon as any;
+    } else {
+        salonData = reward[0].salonId as any;
     }
 
-    // Cast populated data
-    const salonData = reward[0].salonId as any;
+
 
     // Salon info (only once)
     const salon = {
