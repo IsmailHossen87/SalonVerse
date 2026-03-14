@@ -87,6 +87,17 @@ const visitConfirm = catchAsync(async (req: Request, res: Response) => {
         message: result.message
     });
 });
+
+
+const salonMenagement = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user.userId;
+    const result = await salonService.salonMenagement(user);
+
+    res.status(200).json({
+        success: true,
+        data: result,
+    });
+});
 export const salonController = {
     createSalon,
     getAllSalon,
@@ -94,5 +105,6 @@ export const salonController = {
     updateSalon,
     deleteSalon,
     visitConfirm,
-    getSalonSetting
+    getSalonSetting,
+    salonMenagement
 };

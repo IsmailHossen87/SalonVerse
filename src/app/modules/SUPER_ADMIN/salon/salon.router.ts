@@ -18,6 +18,7 @@ router.patch("/setting", checkAuth(USER_ROLE.OWNER),
 router.get("/setting", checkAuth(USER_ROLE.OWNER), catchAsync(salonController.getSalonSetting));
 
 router.get("/", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER, USER_ROLE.USER), catchAsync(salonController.getAllSalon));
+router.get("/salon-menagement", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.salonMenagement));
 
 router.get("/:id", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), catchAsync(salonController.getSingleSalon));
 

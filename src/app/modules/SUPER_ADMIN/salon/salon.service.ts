@@ -7,7 +7,7 @@ import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { generateHashCode } from "../../../utils/generate";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
 import { visitSalon } from "./visitRecord";
-import { PurchaseReward, Reward, ViewReward } from "../../reward/reward.model";
+import { PointIssuedHistory, PurchaseReward, Reward, ViewReward } from "../../reward/reward.model";
 import { RewardSalonModel } from "../../ADMIN/salonReward/salonReward.model";
 import axios from "axios";
 import { envVar } from "../../../config/env";
@@ -57,7 +57,6 @@ export const dailySubscriptionCheck = async () => {
 };
 
 const getAllSalon = async (query: any) => {
-
     const { lat1, lon1, ...rest } = query;
 
     const queryBuilder = new QueryBuilder(SalonModel.find().populate("admin", "name email phoneNumber"), rest);
@@ -211,8 +210,9 @@ const visitConfirm = async (id: string, user: string, lat1: string, lon1: string
     if (!salon) {
         throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
     }
-    const checkTodayVisitSalon = await PurchaseReward.findOne({ salonId: salon._id, userId: user, createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } });
-    if (checkTodayVisitSalon) {
+
+    const checkTodayVisitSalon = await PointIssuedHistory.find({ salonId: salon._id, userId: user, createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } });
+    if (checkTodayVisitSalon.length > 0) {
         throw new AppError(httpStatus.BAD_REQUEST, "You have already visited this salon today");
     }
 
@@ -239,7 +239,27 @@ const visitConfirm = async (id: string, user: string, lat1: string, lon1: string
     return { message: "Visit confirmed successfully" }
 };
 
+const salonMenagement = async (user: string) => {
+    const owner = await UserModel.findById(user);
+    if (!owner) {
+        throw new AppError(httpStatus.NOT_FOUND, "Owner not found");
+    }
 
+    if (owner.role !== USER_ROLE.SUPER_ADMIN) {
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+    }
+    const activeSalon = await SalonModel.countDocuments({ activeStatus: IStatus.ACTIVE });
+    const totalUser = await UserModel.countDocuments({ role: USER_ROLE.USER });
+    const expiringSoon = await SalonModel.find({
+        subscriptionEndDate: {
+            $gte: new Date(),
+            $lt: new Date(new Date().setDate(new Date().getDate() + 30))
+        }
+    }).select("businessName")
+    const totalExpiringSoon = expiringSoon.length;
+
+    return { activeSalon, totalUser, totalExpiringSoon };
+};
 export const salonService = {
     createSalon,
     getAllSalon,
@@ -247,5 +267,6 @@ export const salonService = {
     updateSalon,
     deleteSalon,
     visitConfirm,
-    getSalonSetting
+    getSalonSetting,
+    salonMenagement
 };
