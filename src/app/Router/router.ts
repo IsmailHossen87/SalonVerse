@@ -10,6 +10,7 @@ import { CustomerRoutes } from "../modules/ADMIN/customer/customer.router";
 import { DashboardRouter } from "../modules/ADMIN/dashboard/dashboard.router";
 import { RewardRouter } from "../modules/reward/reward.router";
 import { notificationRouter } from "../modules/notification/notification.router";
+import { AnalysisRoutes } from "../modules/SUPER_ADMIN/analysis/analysis.router";
 
 const router = Router();
 
@@ -57,6 +58,10 @@ const apiRoutes = [
     {
         path: "/notification",
         router: notificationRouter
+    },
+    {
+        path: "/analysis",
+        router: AnalysisRoutes
     }
 ]
 
