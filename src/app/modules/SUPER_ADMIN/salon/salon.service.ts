@@ -251,7 +251,7 @@ const salonMenagement = async (user: string) => {
     const activeSalon = await SalonModel.countDocuments({ activeStatus: IStatus.ACTIVE });
     const totalUser = await UserModel.countDocuments({ role: USER_ROLE.USER });
     const expiringSoon = await SalonModel.find({
-        subscriptionEndDate: {
+        expiryDate: {
             $gte: new Date(),
             $lt: new Date(new Date().setDate(new Date().getDate() + 30))
         }
