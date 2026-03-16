@@ -1,9 +1,8 @@
 import AppError from "../../../errorHalper.ts/AppError";
 import { saveNotification, socketHelper } from "../../../helpers/socketHelper";
-import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
 import { INOTIFICATION_EVENT, INOTIFICATION_TYPE, IREFERENCE_TYPE } from "../../notification/notification.interface";
 import { PointIssuedHistory, ViewReward } from "../../reward/reward.model";
-import { Rule } from "../../Setting/rule/rule.model";
+import { Rule, TimeDayRule } from "../../Setting/rule/rule.model";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { UserModel } from "../../user/user.model";
 import { SalonModel } from "./salon.model";
@@ -34,6 +33,8 @@ export const visitSalon = async (salonId: string, userId: string) => {
     );
 
     const currentHour = riyadhTime.getHours();
+    const daysMap = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const currentDay = daysMap[riyadhTime.getDay()];
 
     // 5️⃣ Prevent Multiple Coins Same Day
     const startOfDay = new Date(riyadhTime);
@@ -87,15 +88,25 @@ export const visitSalon = async (salonId: string, userId: string) => {
     const isTotalVisitBonus = nextVisitCount % rules.totalVist === 0;
 
     // 🔟 Coin Calculate
-    let coinsToAdd = rules.everyVisitCoins;
+    let baseCoins = rules.everyVisitCoins;
+    if (isInTimeZone) baseCoins += rules.timeZoneGetCoin;
+    if (isTotalVisitBonus) baseCoins += rules.totalVisitGetCoin;
 
-    if (isInTimeZone) {
-        coinsToAdd += rules.timeZoneGetCoin;
+    // 1️⃣1️⃣ Time & Day Rule Multiplier
+    const activeTimeDayRules = await TimeDayRule.find({ isActive: true });
+    let appliedMultiplier = 1;
+    let appliedRuleName: string | null = null;
+
+    for (const tdr of activeTimeDayRules) {
+        const dayMatch = (tdr as any).applicableDays.includes(currentDay);
+        const timeMatch = currentHour >= (tdr as any).timeStart && currentHour < (tdr as any).timeEnd;
+        if (dayMatch && timeMatch && (tdr as any).pointsMultiplier > appliedMultiplier) {
+            appliedMultiplier = (tdr as any).pointsMultiplier;
+            appliedRuleName = (tdr as any).ruleName;
+        }
     }
 
-    if (isTotalVisitBonus) {
-        coinsToAdd += rules.totalVisitGetCoin;
-    }
+    const coinsToAdd = Math.round(baseCoins * appliedMultiplier);
 
     // 1️⃣1️⃣ Create or Update Reward Entry
     const reward = await ViewReward.findOneAndUpdate(
@@ -121,17 +132,7 @@ export const visitSalon = async (salonId: string, userId: string) => {
         salonId: salonId,
         points: coinsToAdd,
     })
-    // if (user.fcmToken) {
-    //     await firebaseNotificationBuilder({
-    //         user: user,
-    //         title: "You've successfully visited a salon",
-    //         body: `You've sucessfully visited a salon and received ${coinsToAdd} coins`,
-    //         notificationEvent: INOTIFICATION_EVENT.VISIT,
-    //         notificationType: INOTIFICATION_TYPE.NOTIFICATION,
-    //         referenceId: user._id,
-    //         referenceType: "User"
-    //     })
-    // }
+
     socketHelper.emit("notification", {
         receiver: user._id.toString(),
         title: "Visit Reward pending",
@@ -170,6 +171,8 @@ export const visitSalon = async (salonId: string, userId: string) => {
             baseCoins: rules.everyVisitCoins,
             timezoneBonus: isInTimeZone ? rules.timeZoneGetCoin : 0,
             visitCountBonus: isTotalVisitBonus ? rules.totalVisitGetCoin : 0,
+            timeDayMultiplier: appliedMultiplier,
+            appliedTimeDayRule: appliedRuleName,
             total: coinsToAdd,
         },
         reward,

@@ -46,4 +46,7 @@ export interface ISalon {
 
     activeStatus: IStatus
     admin?: Types.ObjectId;
+    rating: number;
+    comments: string[];
+    totalReviews: number;
 }

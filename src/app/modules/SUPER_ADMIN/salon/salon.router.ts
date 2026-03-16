@@ -21,6 +21,7 @@ router.get("/", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.OWNER, USER_ROLE.USER
 router.get("/salon-menagement", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.salonMenagement));
 
 router.get("/:id", checkAuth(USER_ROLE.SUPER_ADMIN, USER_ROLE.USER, USER_ROLE.OWNER), catchAsync(salonController.getSingleSalon));
+router.post("/rating/:id", checkAuth(USER_ROLE.USER), catchAsync(salonController.createRating));
 
 
 router.delete("/:id", checkAuth(USER_ROLE.SUPER_ADMIN), catchAsync(salonController.deleteSalon));

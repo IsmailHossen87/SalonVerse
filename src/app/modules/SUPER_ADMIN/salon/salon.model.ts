@@ -35,22 +35,20 @@ const salonSchema = new Schema<ISalon>(
         lon: { type: String },
         description: { type: String },
         openingTime: { type: [openingTimeSchema] },
-
+        totalReviews: { type: Number, default: 0 },
     },
     {
         timestamps: true,
     }
 );
 
-// const customerVisitorSchema = new Schema({
-//     salon: { type: Schema.Types.ObjectId, ref: "Salon", required: true, },
-//     customer: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-//     visitDate: { type: Date, required: true, },
-//     visitTime: { type: String, required: true, },
-//     viewCount: { type: Number, default: 0 },
-//     lastVisitAt: { type: Date },
-// });
+const ratingSchema = new Schema({
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, },
+    salonId: { type: Schema.Types.ObjectId, ref: "Salon", required: true, },
+    rating: { type: Number, default: 0, max: 5 },
+    comment: { type: String },
+})
 
-// export const CustomerVisitorModel = model("CustomerVisitor", customerVisitorSchema);
+export const RatingModel = model("Rating", ratingSchema);
 
 export const SalonModel = model<ISalon>("Salon", salonSchema);

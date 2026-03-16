@@ -13,24 +13,24 @@ router.route("/tire")
      .post(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.tireRule)
      .get(RuleController.allTire)
 
+router.route("/tire/:id")
+     .patch(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.updateTire)
+router.route("/tire-is-active/:id").patch(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.tireIsActive)
+
 router.route("/smart").put(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.smartRule)
-router.route("/reward").put(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.rewardRule)
+router.route("/smart/:id").patch(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.updateSmartRule)
+
+
+// Time & Day Reward Rules
+router.route("/time-day-rule")
+     .post(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.createTimeDayRule)
+     .get(RuleController.getAllTimeDayRules)
+
+router.route("/time-day-rule/:id")
+     .patch(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.toggleTimeDayRule)
+     .delete(checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.deleteTimeDayRule)
 
 router.route("/:ruleType").get(RuleController.getRule)
 
-// router
-//      .route('/content')
-//      .patch(validateRequest(RuleValidation.contentZodSchema), checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.upsertContent)
-//      .get(validateRequest(RuleValidation.contentZodSchema), RuleController.getContent);
-
-// router
-//      .route('/value')
-//      .patch(validateRequest(RuleValidation.valuesZodSchema), checkAuth(USER_ROLE.SUPER_ADMIN), RuleController.upsertValuse)
-//      .get(validateRequest(RuleValidation.valuesZodSchema), RuleController.getValue);
-
-// // router
-//      .route('/social-media')
-// .post(validateRequest(RuleValidation.socialMediaZodSchema), auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN), RuleController.createSocialMedia)
-// .get(validateRequest(RuleValidation.socialMediaZodSchema), RuleController.getSocialMedia);
-
 export const RuleRoute = router;
+

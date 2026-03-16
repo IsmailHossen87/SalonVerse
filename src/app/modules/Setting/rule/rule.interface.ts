@@ -29,15 +29,19 @@ export type IRule = {
      passwordLength: number;
      ruleType: RuleType;
      everyVisitCoins: number;
+     everyVisitIsActive: boolean;
      timeZoneStart: number;
      timeZoneEnd: number;
      timeZoneGetCoin: number;
+     timeZoneIsActive: boolean;
      totalVist: number;
+     totalVisitIsActive: boolean;
      totalVisitGetCoin: number;
      inviteEarCoin: number;
+     inviteEarIsActive: boolean;
      tireName: string;
-     tireLevel: number;
      tireCoins: number;
+     isActive: boolean;
 };
 
 export type RuleModel = Model<IRule, Record<string, unknown>>;

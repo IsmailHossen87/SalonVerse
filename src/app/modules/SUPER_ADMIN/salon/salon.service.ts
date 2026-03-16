@@ -1,6 +1,6 @@
 // salon.service.ts
 import httpStatus from "http-status-codes";
-import { SalonModel } from "./salon.model";
+import { RatingModel, SalonModel } from "./salon.model";
 import AppError from "../../../errorHalper.ts/AppError";
 import { UserModel } from "../../user/user.model";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
@@ -12,6 +12,7 @@ import { RewardSalonModel } from "../../ADMIN/salonReward/salonReward.model";
 import axios from "axios";
 import { envVar } from "../../../config/env";
 import { getDistance } from "./distance";
+import mongoose from "mongoose";
 
 const createSalon = async (payload: any, user: string) => {
     const superAdmin = await UserModel.findById(user);
@@ -175,11 +176,24 @@ const getSingleSalon = async (id: string, userId: string, lat1: string, lon1: st
 
     const totalOnline = visitors.filter((visitor: any) => visitor.userId?.isOnline).length;
 
-    // 5️⃣ Return summary only
+    const result = await RatingModel.aggregate([
+        {
+            $match: { salonId: new mongoose.Types.ObjectId(id) }
+        },
+        {
+            $group: {
+                _id: "$salonId",
+                averageRating: { $avg: "$rating" },
+                totalRatings: { $sum: 1 }
+            }
+        }
+    ]);
     return {
         ...salon.toObject(),
         totalOnline,
-        distance
+        distance,
+        averageRating: result[0]?.averageRating,
+        totalRatings: result[0]?.totalRatings
     };
 };
 const getSalonSetting = async (user: string) => {
@@ -260,6 +274,29 @@ const salonMenagement = async (user: string) => {
 
     return { activeSalon, totalUser, totalExpiringSoon };
 };
+
+const updateSalonRating = async (id: string, user: string, rating: number, comment: string) => {
+    const userInfo = await UserModel.findById(user);
+    if (!userInfo) {
+        throw new AppError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    console.log("USERinfo", userInfo)
+    if (rating < 1 || rating > 5) {
+        throw new AppError(httpStatus.BAD_REQUEST, "Rating must be between 1 and 5");
+    }
+
+    if (userInfo.role !== USER_ROLE.USER) {
+        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+    }
+    const salon = await RatingModel.create({ rating, comment, userId: user, salonId: id });
+
+    if (!salon) {
+        throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
+    }
+
+    return salon;
+};
 export const salonService = {
     createSalon,
     getAllSalon,
@@ -268,5 +305,6 @@ export const salonService = {
     deleteSalon,
     visitConfirm,
     getSalonSetting,
-    salonMenagement
+    salonMenagement,
+    updateSalonRating
 };

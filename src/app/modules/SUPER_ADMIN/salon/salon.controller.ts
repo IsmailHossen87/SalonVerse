@@ -98,6 +98,18 @@ const salonMenagement = catchAsync(async (req: Request, res: Response) => {
         data: result,
     });
 });
+
+const createRating = catchAsync(async (req: Request, res: Response) => {
+    const user = req.user.userId;
+    const { rating, comment } = req.body;
+    const result = await salonService.updateSalonRating(req.params.id as string, user, rating, comment);
+
+    res.status(200).json({
+        success: true,
+        message: "Salon rating updated successfully",
+        data: result,
+    });
+});
 export const salonController = {
     createSalon,
     getAllSalon,
@@ -106,5 +118,6 @@ export const salonController = {
     deleteSalon,
     visitConfirm,
     getSalonSetting,
-    salonMenagement
+    salonMenagement,
+    createRating
 };
