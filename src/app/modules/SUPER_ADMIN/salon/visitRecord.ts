@@ -6,10 +6,11 @@ import { Rule, TimeDayRule } from "../../Setting/rule/rule.model";
 import { IStatus, USER_ROLE } from "../../user/user.interface";
 import { UserModel } from "../../user/user.model";
 import { SalonModel } from "./salon.model";
+import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
 
 export const visitSalon = async (salonId: string, userId: string) => {
     // 1️⃣ Check User
-    const user = await UserModel.findById(userId);
+    const user = await UserModel.findById(userId).select("+fcmToken");
     if (!user) throw new AppError(404, "User not found");
 
     if (user.role !== USER_ROLE.USER) {
@@ -49,9 +50,9 @@ export const visitSalon = async (salonId: string, userId: string) => {
         lastVisitAt: { $gte: startOfDay, $lte: endOfDay },
     });
 
-    // if (todayVisit) {
-    //     throw new AppError(400, "Already received coin today");
-    // }
+    if (todayVisit) {
+        throw new AppError(400, "User has already received a visit coin for this salon today");
+    }
 
     // 6️⃣ Monthly Visit Count
     const startOfMonth = new Date(
@@ -121,12 +122,13 @@ export const visitSalon = async (salonId: string, userId: string) => {
                 totalVisitBonusCoins: isTotalVisitBonus ? rules.totalVisitGetCoin : 0,
             },
             $set: {
-                status: IStatus.PENDING,
+                status: IStatus.APPROVED,
                 lastVisitAt: new Date(),
             },
         },
         { upsert: true, new: true }
     );
+    console.log("rewardVIEWcount", reward.viewCount)
     await PointIssuedHistory.create({
         userId: userId,
         salonId: salonId,
@@ -147,6 +149,67 @@ export const visitSalon = async (salonId: string, userId: string) => {
         notificationType: INOTIFICATION_TYPE.NOTIFICATION,
         read: false,
     });
+
+    // 🔥 Push Notifications for User Engagement
+    const pushNotifications: any[] = [];
+
+
+    // Phase 2: After First Visit
+    if (reward.viewCount === 1) {
+        pushNotifications.push(firebaseNotificationBuilder({
+            user,
+            title: "Visit Recorded",
+            body: "That was just the beginning 💖",
+            notificationEvent: INOTIFICATION_EVENT.VISIT
+        }));
+    }
+
+    // Phase 3: Reward Engine (Points Milestones)
+    const totalCoins = reward.totalCoins || 0;
+    if (totalCoins >= 400) {
+        pushNotifications.push(firebaseNotificationBuilder({
+            user,
+            title: "Reward Unlocked",
+            body: "Your reward is ready 💖 Go enjoy it!",
+            notificationEvent: INOTIFICATION_EVENT.VISIT
+        }));
+    } else if (totalCoins >= 300) {
+        pushNotifications.push(firebaseNotificationBuilder({
+            user,
+            title: "So Close!",
+            body: "You’re so close 🎁 Just one visit left!",
+            notificationEvent: INOTIFICATION_EVENT.VISIT
+        }));
+    } else if (totalCoins >= 200) {
+        pushNotifications.push(firebaseNotificationBuilder({
+            user,
+            title: "Mid Progress",
+            body: "You’re getting closer to something special ✨",
+            notificationEvent: INOTIFICATION_EVENT.VISIT
+        }));
+    } else if (totalCoins >= 100 && totalCoins < 200) {
+        // Check if it just crossed 100 in this visit
+        if (totalCoins - coinsToAdd < 100) {
+            pushNotifications.push(firebaseNotificationBuilder({
+                user,
+                title: "Points Rolling In 💖",
+                body: "You’ve started collecting points 💖 Keep going!",
+                notificationEvent: INOTIFICATION_EVENT.VISIT
+            }));
+        }
+    } else {
+        pushNotifications.push(firebaseNotificationBuilder({
+            user,
+            title: "Points Rolling In 💖",
+            body: "You’ve started collecting points 💖 Keep going!",
+            notificationEvent: INOTIFICATION_EVENT.VISIT
+        }));
+    }
+
+
+    // Wait for pushes but don't block the main flow entirely if they fail
+    Promise.allSettled(pushNotifications);
+
     // realtime notification for admin
     socketHelper.emit("notification", {
         receiver: admin._id,

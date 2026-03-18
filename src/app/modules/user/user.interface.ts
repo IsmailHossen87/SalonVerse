@@ -66,4 +66,6 @@ export interface IUser {
     isCompleted?: boolean;
     lastActiveAt?: Date;
     isOnline?: boolean;
+    userLat?: string;
+    userLon?: string;
 }

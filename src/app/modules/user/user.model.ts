@@ -29,7 +29,7 @@ export const UserSchema = new Schema<IUser>({
     notification: { type: Boolean, default: false },
     isVibrationNotificationEnabled: { type: Boolean, default: true, },
     isSoundNotificationEnabled: { type: Boolean, default: true, },
-    fcmToken: { type: String, select: false },
+    fcmToken: { type: String, select: false, default: "" },
 
     coins: { type: Number, default: 0 },
     spentCoins: { type: Number, default: 0 },
@@ -49,6 +49,8 @@ export const UserSchema = new Schema<IUser>({
         default: Date.now,
     },
     isOnline: { type: Boolean, default: false, },
+    userLat: { type: String, default: "" },
+    userLon: { type: String, default: "" },
 }, { timestamps: true })
 
 

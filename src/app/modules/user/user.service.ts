@@ -23,9 +23,6 @@ import { NotificationModel } from "../notification/notification.model";
 // ✅ Step 1: OTP পাঠাও
 const sendRegistrationOTP = async (phoneNumber: string) => {
     const existingUser = await UserModel.findOne({ phoneNumber });
-    if (existingUser) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
-    }
 
     await sendOTP(phoneNumber);
     return { message: "OTP sent to " + phoneNumber };
@@ -103,10 +100,10 @@ export const createUser = async (payload: any) => {
 
         /* ================= OTP VERIFY ================= */
 
-        // await verifyOTPService(
-        //     phoneNumber,
-        //     otp,
-        // );
+        await verifyOTPService(
+            phoneNumber,
+            otp,
+        );
 
         /* ================= IF USER EXISTS → LOGIN ================= */
 
@@ -130,7 +127,7 @@ export const createUser = async (payload: any) => {
         let inviterUser = null;
 
         if (referralCode) {
-            inviterUser = await UserModel.findOne({ referralCode });
+            inviterUser = await UserModel.findOne({ referralCode }).select("+fcmToken");
             if (!inviterUser) {
                 throw new AppError(httpStatus.BAD_REQUEST, "Invalid referral code");
             }
@@ -196,29 +193,34 @@ export const createUser = async (payload: any) => {
                     read: false,
                 });
             }
-            // if (inviterUser.fcmToken) {
-            //     await firebaseNotificationBuilder({
-            //         user: inviterUser,
-            //         title: "Enjoy a 20 AED reward ",
-            //         body: "You can enjoy a 20 AED reward for inviting a new user",
-            //         notificationEvent: INOTIFICATION_EVENT.INVITE,
-            //         notificationType: INOTIFICATION_TYPE.NOTIFICATION,
-            //         referenceId: inviterUser._id,
-            //         referenceType: "User"
-            //     })
-            // }
-
+            Promise.allSettled([
+                firebaseNotificationBuilder({
+                    user: inviterUser,
+                    title: "Referral Success",
+                    body: "Your friend joined 💖 You earned something special!",
+                    notificationEvent: INOTIFICATION_EVENT.INVITE,
+                })
+            ]);
         }
 
 
         await session.commitTransaction();
         session.endSession();
 
+        // 🔥 Push Notification for New User (#1 Welcome)
+        if (user[0] && user[0].fcmToken) {
+            firebaseNotificationBuilder({
+                user: user[0],
+                title: "Welcome to Zena",
+                body: "Your glow journey starts here",
+                notificationEvent: INOTIFICATION_EVENT.LOGIN
+            });
+        }
+
         /* ================= GENERATE TOKENS ================= */
         const token = await CreateUserToken(user[0]);
         return {
             isNewUser: true,
-            user: "Bhai",
             accessToken: token.accessToken,
             refreshToken: token.refreshToken,
         };
@@ -264,7 +266,7 @@ const updateUser = async (payload: any, owner: JwtPayload) => {
 };
 
 const userDetails = async (userId: string) => {
-    const result = await UserModel.findById({ _id: userId }).select("-password ");
+    const result = await UserModel.findById({ _id: userId }).select("-password +fcmToken");
     if (!result) {
         throw new AppError(httpStatus.BAD_REQUEST, "User not found");
     }

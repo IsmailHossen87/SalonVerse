@@ -1,16 +1,9 @@
 // OTP.service.ts
-import twilio from "twilio";
 import httpStatus from "http-status-codes";
 import { OtpLog } from "./OTP.model";
 import { redisClient } from "../../config/redis.config";
 import AppError from "../../errorHalper.ts/AppError";
-
-const client = twilio(
-    process.env.TWILIO_ACCOUNT_SID!,
-    process.env.TWILIO_AUTH_TOKEN!
-);
-
-const SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID!;
+import { sendOTP, verifyOTP } from "../../middleware/twilio";
 
 /* ================= SEND OTP ================= */
 
@@ -50,10 +43,8 @@ export const sendOTPService = async (
         EX: 60,
     });
 
-    // 📌 Send via Twilio
-    await client.verify.v2
-        .services(SERVICE_SID)
-        .verifications.create({ to: phoneNumber, channel: "sms" });
+    // 📌 Send via Twilio (uses consolidated client from twilio.ts)
+    await sendOTP(phoneNumber);
 
     await OtpLog.create({
         phoneNumber,
@@ -70,8 +61,6 @@ export const sendOTPService = async (
 export const verifyOTPService = async (
     phoneNumber: string,
     code: string,
-    // ip: string,
-    // userAgent: string
 ) => {
     // 📌 Max 5 attempts in 5 min
     const attempts = await redisClient.incr(`otp:attempts:${phoneNumber}`);
@@ -81,28 +70,21 @@ export const verifyOTPService = async (
     if (attempts > 5)
         throw new AppError(429, "Too many verification attempts");
 
-    const result = await client.verify.v2
-        .services(SERVICE_SID)
-        .verificationChecks.create({ to: phoneNumber, code });
-
-    if (result.status !== "approved") {
+    try {
+        await verifyOTP(phoneNumber, code);
+    } catch (error: any) {
         await OtpLog.create({
             phoneNumber,
-            // ip,
             action: "FAILED_VERIFY",
-            // userAgent,
         });
-
-        throw new AppError(httpStatus.BAD_REQUEST, "Invalid or expired OTP");
+        throw new AppError(httpStatus.BAD_REQUEST, error?.message || "Invalid or expired OTP");
     }
 
     await redisClient.del(`otp:attempts:${phoneNumber}`);
 
     await OtpLog.create({
         phoneNumber,
-        // ip,
         action: "VERIFY",
-        // userAgent,
     });
 
     return true;

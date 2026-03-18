@@ -11,6 +11,9 @@ import mongoose, { Types } from "mongoose";
 import { firebaseNotificationBuilder } from "../../../shared/sendNotification";
 import { INOTIFICATION_EVENT, INOTIFICATION_TYPE, IREFERENCE_TYPE } from "../../notification/notification.interface";
 import { saveNotification, socketHelper } from "../../../helpers/socketHelper";
+import { Rule } from "../../Setting/rule/rule.model";
+import { getDistance } from "../../SUPER_ADMIN/salon/distance";
+import { visitSalon } from "../../SUPER_ADMIN/salon/visitRecord";
 // reward.service.ts
 const createReward = async (payload: any, userId: string) => {
     const user = await UserModel.findById(userId);
@@ -290,47 +293,44 @@ const getAllRedemption = async (query: any, userId: string) => {
 
 }
 
-const approveRedemption = async (id: string, userId: string) => {
-    const reward = await PurchaseReward.findById(id);
-    if (!reward) throw new AppError(httpStatus.NOT_FOUND, "Reward not found");
-    const rewardInfo = await RewardSalonModel.findById(reward?.rewardId);
+const approveRedemption = async (id: string, adminId: string) => {
+    // id = userId passed by admin, adminId = logged-in admin
 
-    if (rewardInfo?.ownerId.toString() !== userId) {
-        throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
-    }
-
-    let status = "";
-    if (reward.status === IStatus.PENDING) {
-        status = IStatus.APPROVED;
-    } else if (reward.status === IStatus.APPROVED) {
-        status = IStatus.REJECTED;
-    } else {
-        status = IStatus.APPROVED;
-    }
-
-    await PurchaseReward.findByIdAndUpdate(id, { status });
-
-    if (status === IStatus.APPROVED) {
-        await UserModel.findByIdAndUpdate(reward.userId, {
-            $inc: { coins: rewardInfo.rewardPoints }
-        });
-    } else if (status === IStatus.REJECTED) {
-        await UserModel.findByIdAndUpdate(reward.userId, {
-            $inc: { coins: -rewardInfo.rewardPoints }
-        });
-    }
-
-    const user = await UserModel.findById(reward.userId);
+    // 1️⃣ Find the target user
+    const user = await UserModel.findById(id);
     if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
-    socketHelper.emit("notification", {
-        receiver: user._id.toString(),
-        title: "Approved Reward",
-        message: `You've successfully claimed a reward ${rewardInfo.rewardPoints} coins`,
-        type: "VISIT_REWARD",
-    });
 
+    // 2️⃣ Find admin and their salon
+    const admin = await UserModel.findById(adminId);
+    if (!admin) throw new AppError(httpStatus.NOT_FOUND, "Admin not found");
 
-    return `Reward ${status} successfully`;
+    const salon = await SalonModel.findOne({ admin: admin._id });
+    if (!salon) throw new AppError(httpStatus.NOT_FOUND, "Salon not found for this admin");
+
+    // 3️⃣ Check if user's last known location is within 50 meters of the salon
+    if (!user.userLat || !user.userLon) {
+        throw new AppError(httpStatus.BAD_REQUEST, "User location is not available");
+    }
+
+    const distanceKm = getDistance(user.userLat, user.userLon, salon.lat, salon.lon);
+    const distanceMeters = distanceKm * 1000;
+
+    if (isNaN(distanceMeters) || distanceMeters > 50) {
+        throw new AppError(
+            httpStatus.BAD_REQUEST,
+            `User is not within 50 meters of your salon. Current distance: ${Math.round(distanceMeters)} meters.`
+        );
+    }
+
+    // 4️⃣ Call visitSalon — handles daily limit, monthly limit, timezone bonus,
+    //    coin calculation, ViewReward update, PointIssuedHistory, and all notifications
+    const result = await visitSalon(salon._id.toString(), user._id.toString());
+
+    return {
+        message: `Visit approved! ${result.coinsBreakdown.total} coins granted to ${user.name}`,
+        distanceMeters: Math.round(distanceMeters),
+        coinsBreakdown: result.coinsBreakdown,
+    };
 }
 
 const getPurchaseRewardHistory = async (userId: string, query: Record<string, string>) => {
@@ -422,3 +422,16 @@ export const salonRewardService = {
     getPurchaseRewardHistory,
     getViewHistory
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

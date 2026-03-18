@@ -27,7 +27,7 @@ const googleLogin = async (idToken: string) => {
         }
 
         // Check if user already exists
-        let user = await UserModel.findOne({ email }).select("auths");
+        let user = await UserModel.findOne({ email }).select("auths +fcmToken");
         let isNewUser = false;
 
         if (!user) {
@@ -65,6 +65,17 @@ const googleLogin = async (idToken: string) => {
 
         // JWT Token generate করা
         const tokens = await CreateUserToken(user);
+
+        // 🔥 Push Notification for New User (#1 Welcome)
+        if (isNewUser && user && (user as any).fcmToken) {
+            firebaseNotificationBuilder({
+                user,
+                title: "Welcome to Zena",
+                body: "Your glow journey starts here",
+                notificationEvent: INOTIFICATION_EVENT.LOGIN
+            });
+        }
+
 
         return {
             accessToken: tokens.accessToken,

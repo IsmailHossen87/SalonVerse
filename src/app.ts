@@ -5,7 +5,7 @@ import { notFound } from "./app/middleware/notFound";
 import router from "./app/Router/router";
 import webhookHandler from './app/modules/stripe/webhookHandler';
 import { UserModel } from './app/modules/user/user.model';
-import { startCheckSubscriptionCron, startRewardExpireCron } from './app/modules/Setting/Corn/allCorn';
+import { startCheckSubscriptionCron, startNotificationCrons, startRewardExpireCron } from './app/modules/Setting/Corn/allCorn';
 
 
 const app = express()
@@ -22,7 +22,10 @@ app.use(cors({
         "http://localhost:3002",
         "https://ismail4000.binarybards.online",
         "https://zena-admin-dashboard.vercel.app",
-        "https://zena-user-dashboard.vercel.app"
+        "https://zena-user-dashboard.vercel.app",
+        "http://192.168.1.202:3000",
+        "http://192.168.1.202:3001",
+        "http://192.168.1.202:3002",
     ],
     credentials: true,
 }));
@@ -83,6 +86,7 @@ app.get("/", (req, res) => {
 })
 startCheckSubscriptionCron()
 startRewardExpireCron()
+startNotificationCrons()
 
 app.use(globalErrorHandlare)
 app.use(notFound)

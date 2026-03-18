@@ -215,43 +215,49 @@ const getSalonSetting = async (user: string) => {
     return salonOwner;
 };
 
-const visitConfirm = async (id: string, user: string, lat1: string, lon1: string) => {
-    const viwerInfo = await UserModel.findById(user);
-    if (!viwerInfo) throw new AppError(httpStatus.NOT_FOUND, "User not found");
+// const visitConfirm = async (id: string, user: string, lat1: string, lon1: string) => {
+//     const viwerInfo = await UserModel.findById(user);
+//     if (!viwerInfo) throw new AppError(httpStatus.NOT_FOUND, "User not found");
 
-    // 1️⃣ Find the salon and populate admin info
-    const salon = await SalonModel.findById(id).populate("admin", "name email phoneNumber");
-    if (!salon) {
-        throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
-    }
+//     // 1️⃣ Find the salon and populate admin info
+//     const salon = await SalonModel.findById(id).populate("admin", "name email phoneNumber");
+//     if (!salon) {
+//         throw new AppError(httpStatus.NOT_FOUND, "Salon not found");
+//     }
 
-    const checkTodayVisitSalon = await PointIssuedHistory.find({ salonId: salon._id, userId: user, createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } });
-    if (checkTodayVisitSalon.length > 0) {
-        throw new AppError(httpStatus.BAD_REQUEST, "You have already visited this salon today");
-    }
+//     const checkTodayVisitSalon = await PointIssuedHistory.find({ salonId: salon._id, userId: user, createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } });
+//     if (checkTodayVisitSalon.length > 0) {
+//         throw new AppError(httpStatus.BAD_REQUEST, "You have already visited this salon today");
+//     }
 
-    // 2️⃣ Find all visitors for this salon
-    const visitors = await ViewReward.find({ salonId: salon._id }).populate<{ customer: { isOnline: boolean } }>(
-        "userId",
-        "isOnline "
-    )
-        .lean();
+//     // 2️⃣ Find all visitors for this salon
+//     const visitors = await ViewReward.find({ salonId: salon._id }).populate<{ customer: { isOnline: boolean } }>(
+//         "userId",
+//         "isOnline "
+//     )
+//         .lean();
 
-    let distance = 0
-    if (lat1 && lon1) {
-        distance = getDistance(lat1, lon1, salon.lat, salon.lon);
-    }
+//     let distance = NaN
+//     if (lat1 && lon1) {
+//         distance = getDistance(lat1, lon1, salon.lat, salon.lon);
+//     }
 
-    if (distance * 1000 > 50) {
-        throw new AppError(httpStatus.BAD_REQUEST, "You are too far from the salon. You must be within 50 meters.")
-    }
+//     console.log("DISTANCE", distance)
 
-    // 3️⃣ Calculate total points issued
-    await visitSalon(salon._id.toString(), viwerInfo._id.toString());
 
-    // 5️⃣ Return summary only
-    return { message: "Visit confirmed successfully" }
-};
+//     if (isNaN(distance) || distance * 1000 > 50) {
+//         throw new AppError(
+//             httpStatus.BAD_REQUEST,
+//             "You are too far from the salon. You must be within 50 meters."
+//         );
+//     }
+
+//     // 3️⃣ Calculate total points issued
+//     await visitSalon(salon._id.toString(), viwerInfo._id.toString());
+
+//     // 5️⃣ Return summary only
+//     return { message: "Visit confirmed successfully" }
+// };
 
 const salonMenagement = async (user: string) => {
     const owner = await UserModel.findById(user);
@@ -303,7 +309,7 @@ export const salonService = {
     getSingleSalon,
     updateSalon,
     deleteSalon,
-    visitConfirm,
+    // visitConfirm,
     getSalonSetting,
     salonMenagement,
     updateSalonRating

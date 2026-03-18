@@ -69,6 +69,7 @@ const getAllCustomer = async (query: any, userId: string) => {
 }
 
 const getSingleUser = async (userId: string, reqUser: JwtPayload) => {
+    console.log(userId, reqUser.userId)
     const user = await UserModel.findById(userId).select("-auths").populate({ path: "invitedBy", select: "name image phoneNumber" });
     const userInfo = await UserModel.findById(reqUser.userId);
     if (!userInfo) throw new AppError(httpStatus.NOT_FOUND, "User not found");
@@ -76,11 +77,14 @@ const getSingleUser = async (userId: string, reqUser: JwtPayload) => {
 
     if (userInfo.role !== USER_ROLE.OWNER && userInfo.role !== USER_ROLE.SUPER_ADMIN) throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
 
-    const totalVisit = await ViewReward.find({ userId: new mongoose.Types.ObjectId(userId) }).select("viewCount");
+    const totalVisitDoc = await ViewReward.findOne({ userId: new mongoose.Types.ObjectId(userId) }).select("viewCount");
+    const totalVisit = totalVisitDoc ? totalVisitDoc.viewCount : 0;
+
+
 
     const availableReward = await Reward.find({ userId: new mongoose.Types.ObjectId(userId), status: IStatus.PENDING });
 
-    return { user, totalVisit: totalVisit[0].viewCount || 0, availableReward }
+    return { user, totalVisit, availableReward }
 
 }
 
